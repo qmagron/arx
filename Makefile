@@ -4,25 +4,25 @@ SDIR = src
 HDIR = include
 ODIR = obj
 BDIR = bin
+SUBDIRS = net client server queries
 
 BUILD = $(BDIR)/exec
 CC = @g++
-SRCS = $(filter-out $(SDIR)/main.cpp,$(wildcard $(SDIR)/*.cpp))
+SRCS = $(filter-out $(SDIR)/main.cpp,$(wildcard $(SDIR)/*.cpp) $(wildcard $(foreach SUBDIR,$(SUBDIRS),$(SDIR)/$(SUBDIR)/*.cpp)))
 OBJS = $(patsubst $(SDIR)/%.cpp,$(ODIR)/%.o,$(SRCS))
 
 
-$(shell mkdir -p $(ODIR) $(BDIR))
-
-
 $(BUILD): $(SDIR)/main.cpp $(OBJS)
-	@echo -n "Compiling $@..."
-	$(CC) $^ -o $@ && echo " OK" || echo " FAIL"
+	@mkdir -p $(dir $@)
+	@echo -n "Compiling $@... "
+	$(CC) $(FLAGS) -I$(HDIR) $^ -o $@ && echo "OK" || echo "FAIL"
 
 -include $(ODIR)/*.d
 
 $(ODIR)/%.o: $(SDIR)/%.cpp $(HDIR)/%.hpp
-	@echo -n "Compiling $@..."
-	$(CC) $(FLAGS) -c -I$(HDIR) -MMD -o $@ $< && echo " OK" || echo " FAIL"
+	@mkdir -p $(dir $@)
+	@echo -n "Compiling $@... "
+	$(CC) $(FLAGS) -c -I$(HDIR) -MMD -o $@ $< && echo "OK" || echo "FAIL"
 
 
 clean:
