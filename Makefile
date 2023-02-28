@@ -15,13 +15,14 @@ $(shell mkdir -p $(ODIR) $(BDIR))
 
 
 $(BUILD): $(SDIR)/main.cpp $(OBJS)
-	$(CC) $^ -o $@
-	@echo "[COMPILED]"
+	@echo -n "Compiling $@..."
+	$(CC) $^ -o $@ && echo " OK" || echo " FAIL"
 
 -include $(ODIR)/*.d
 
 $(ODIR)/%.o: $(SDIR)/%.cpp $(HDIR)/%.hpp
-	$(CC) $(FLAGS) -c -I$(HDIR) -MMD -o $@ $<
+	@echo -n "Compiling $@..."
+	$(CC) $(FLAGS) -c -I$(HDIR) -MMD -o $@ $< && echo " OK" || echo " FAIL"
 
 
 clean:
