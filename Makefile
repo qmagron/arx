@@ -6,15 +6,15 @@ ODIR = obj
 BDIR = bin
 
 BUILD = $(BDIR)/exec
-CC = g++
-SRCS = $(wildcard $(SDIR)/*.cpp)
+CC = @g++
+SRCS = $(filter-out $(SDIR)/main.cpp,$(wildcard $(SDIR)/*.cpp))
 OBJS = $(patsubst $(SDIR)/%.cpp,$(ODIR)/%.o,$(SRCS))
 
 
 $(shell mkdir -p $(ODIR) $(BDIR))
 
 
-$(BUILD): $(OBJS)
+$(BUILD): $(SDIR)/main.cpp $(OBJS)
 	$(CC) $^ -o $@
 	@echo "[COMPILED]"
 
