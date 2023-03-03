@@ -1,7 +1,7 @@
-#include "queries/GenericQuery"
+#include "queries/GenericQuery.hpp"
+#include "string"
 
 
-
-GenericQuery::GenericQuery(){
+GenericQuery::GenericQuery(std::string){
 
 }

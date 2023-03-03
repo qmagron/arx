@@ -9,6 +9,6 @@ class GenericQuery{
   std::string type;
 
  public:
-  static GenericQuery( std::string) noexcept;
+  GenericQuery( std::string);
   ~GenericQuery() = default;
 };
