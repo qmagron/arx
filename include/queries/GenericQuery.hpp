@@ -1,22 +1,19 @@
 #ifndef __Build_Query__
 #define __Build_Query__
 
-
 #include <string>
 
+class GenericQuery {
+private:
+  
 
-class GenericQuery{
- private:
-  std::string type;
-
- public:
-  GenericQuery( std::string);
+public:
+  GenericQuery() = default;
   ~GenericQuery() = default;
 };
 
-
-namespace QueryBuilder{
-    GenericQuery buildQuery(std::string);
+namespace QueryBuilder {
+GenericQuery buildQuery(std::string);
 }
 
 #endif

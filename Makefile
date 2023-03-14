@@ -1,7 +1,8 @@
-FLAGS = -std=c++20
-
-SDIR = src
+FLAGS = -std=c++2a 
+LIBFLAGS = -lcryptopp
+SDIR = src     
 HDIR = include
+LIBS = -I/usr/include/cryptopp -I $(HDIR)
 ODIR = obj
 BDIR = bin
 SUBDIRS = net queries
@@ -18,12 +19,12 @@ all: $(BDIR)/client $(BDIR)/server
 $(BDIR)/client: $(SDIR)/client/main.cpp $(COBJS)
 	@mkdir -p $(dir $@)
 	@echo -n "Linking $@... "
-	$(CC) $(FLAGS) -I$(HDIR) $^ -o $@ && echo "OK" || echo "FAIL"
+	$(CC) $(FLAGS) $(LIBS) $^ -o $@ $(LIBFLAGS) && echo "OK" || echo "FAIL"
 
 $(BDIR)/server: $(SDIR)/server/main.cpp $(SOBJS)
 	@mkdir -p $(dir $@)
 	@echo -n "Linking $@... "
-	$(CC) $(FLAGS) -I$(HDIR) $^ -o $@ && echo "OK" || echo "FAIL"
+	$(CC) $(FLAGS) $(LIBS) $^ -o $@ $(LIBFLAGS) && echo "OK" || echo "FAIL"
 
 
 -include $(ODIR)/*.d
@@ -31,7 +32,7 @@ $(BDIR)/server: $(SDIR)/server/main.cpp $(SOBJS)
 $(ODIR)/%.o: $(SDIR)/%.cpp $(HDIR)/%.hpp
 	@mkdir -p $(dir $@)
 	@echo -n "Compiling $@... "
-	$(CC) $(FLAGS) -c -I$(HDIR) -MMD -o $@ $< && echo "OK" || echo "FAIL"
+	$(CC) $(FLAGS) -c $(LIBS) -MMD -o $@ $< $(LIBFLAGS) && echo "OK" || echo "FAIL"
 
 
 clean:
