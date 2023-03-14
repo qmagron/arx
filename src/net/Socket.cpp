@@ -107,15 +107,15 @@ void Socket::connect(const std::string& host, unsigned short port) {
   }
 }
 
-void Socket::send(const void *data, size_t dataSize) const {
+void Socket::send(const Packet &packet) const {
   // First, send the packet size
-  int n = ::send(this->fd, &dataSize, sizeof(dataSize), 0);
+  int n = ::send(this->fd, &packet.size, sizeof(packet.size), 0);
   if (n == -1) {
     throw SendException(errno);
   }
 
   // Then, send packet data
-  n = ::send(this->fd, data, dataSize, 0);
+  n = ::send(this->fd, packet.data, packet.size, 0);
   if (n == -1) {
     throw SendException(errno);
   }

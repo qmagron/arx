@@ -4,18 +4,27 @@ SDIR = src
 HDIR = include
 ODIR = obj
 BDIR = bin
-SUBDIRS = net client server queries
+SUBDIRS = net queries
 
-BUILD = $(BDIR)/exec
 CC = @g++
-SRCS = $(filter-out $(SDIR)/main.cpp,$(wildcard $(SDIR)/*.cpp) $(wildcard $(foreach SUBDIR,$(SUBDIRS),$(SDIR)/$(SUBDIR)/*.cpp)))
-OBJS = $(patsubst $(SDIR)/%.cpp,$(ODIR)/%.o,$(SRCS))
+CSRCS = $(filter-out $(wildcard $(SDIR)/client/main.cpp),$(wildcard $(SDIR)/*.cpp) $(wildcard $(foreach SUBDIR,$(SUBDIRS) client,$(SDIR)/$(SUBDIR)/*.cpp)))
+COBJS = $(patsubst $(SDIR)/%.cpp,$(ODIR)/%.o,$(CSRCS))
+SSRCS = $(filter-out $(wildcard $(SDIR)/server/main.cpp),$(wildcard $(SDIR)/*.cpp) $(wildcard $(foreach SUBDIR,$(SUBDIRS) server,$(SDIR)/$(SUBDIR)/*.cpp)))
+SOBJS = $(patsubst $(SDIR)/%.cpp,$(ODIR)/%.o,$(SSRCS))
 
 
-$(BUILD): $(SDIR)/main.cpp $(OBJS)
+all: $(BDIR)/client $(BDIR)/server
+
+$(BDIR)/client: $(SDIR)/client/main.cpp $(COBJS)
 	@mkdir -p $(dir $@)
-	@echo -n "Compiling $@... "
+	@echo -n "Linking $@... "
 	$(CC) $(FLAGS) -I$(HDIR) $^ -o $@ && echo "OK" || echo "FAIL"
+
+$(BDIR)/server: $(SDIR)/server/main.cpp $(SOBJS)
+	@mkdir -p $(dir $@)
+	@echo -n "Linking $@... "
+	$(CC) $(FLAGS) -I$(HDIR) $^ -o $@ && echo "OK" || echo "FAIL"
+
 
 -include $(ODIR)/*.d
 
@@ -29,4 +38,4 @@ clean:
 	rm -rf $(ODIR) $(BDIR)
 
 
-.PHONY: clean
+.PHONY: all clean

@@ -14,6 +14,11 @@ struct Packet {
   ~Packet() {
     free(this->data);
   }
+  Packet(const Packet& other) noexcept {
+    this->size = other.size;
+    this->data = malloc(other.size);
+    memcpy(this->data, other.data, other.size);
+  }
   Packet(Packet&& other) noexcept {
     this->size = other.size;
     this->data = other.data;
@@ -37,6 +42,9 @@ class Socket {
   const unsigned short port;
   Status status = IDLE;
 
+  int accept() const;
+  int connect(const std::string& host, unsigned short port) const;
+
 
  public:
   /**
@@ -47,9 +55,6 @@ class Socket {
    */
   Socket(unsigned short port);
   ~Socket();
-
-  int accept() const;
-  int connect(const std::string& host, unsigned short port) const;
 
 
   /* ---------- IN socket ---------- */
@@ -89,7 +94,7 @@ class Socket {
    *
    * @throw Socket::SendException
    */
-  void send(const void *data, size_t dataSize) const;
+  void send(const Packet &packet) const;
 
 
   /* ---------- Exceptions ---------- */
