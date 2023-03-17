@@ -1,9 +1,18 @@
 #include "server-proxy/ServerProxy.hpp"
 
 
-ServerProxy::ServerProxy(unsigned int inPort, unsigned int outPort): Proxy(inPort, outPort) {}
+ServerProxy::ServerProxy(unsigned short inPort): Proxy(inPort) {}
 
 
-Packet ServerProxy::forward(const Packet &data) {
-  return data;
+void ServerProxy::connect(const std::string &remoteHost, unsigned short remotePort) {
+  // TODO
+}
+
+void ServerProxy::send(const Packet &packet) {
+  // TODO
+}
+
+
+Packet ServerProxy::forward(const Packet &inPacket) {
+  return inPacket;
 }

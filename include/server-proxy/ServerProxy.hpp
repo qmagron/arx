@@ -6,10 +6,13 @@
 
 class ServerProxy: public Proxy {
  protected:
-  Packet forward(const Packet &data) override;
+  Packet forward(const Packet &inPacket) override;
+
+  void connect(const std::string &remoteHost, unsigned short remotePort) override;
+  void send(const Packet &packet) override;
 
  public:
-  ServerProxy(unsigned int inPort, unsigned int outPort);
+  ServerProxy(unsigned short inPort);
 };
 
 

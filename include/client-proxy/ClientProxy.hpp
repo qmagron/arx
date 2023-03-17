@@ -6,10 +6,10 @@
 
 class ClientProxy: public Proxy {
  protected:
-  Packet forward(const Packet &data) override;
+  Packet forward(const Packet &inPacket) override;
 
  public:
-  ClientProxy(unsigned int inPort, unsigned int outPort);
+  ClientProxy(unsigned short inPort, unsigned short outPort);
 };
 
 

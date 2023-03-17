@@ -43,7 +43,6 @@ class Socket {
   Status status = IDLE;
 
   int accept() const;
-  int connect(const std::string& host, unsigned short port) const;
 
 
  public:
