@@ -1,5 +1,4 @@
 FLAGS = -std=c++2a
-LIBFLAGS = -lcryptopp
 SDIR = src
 HDIR = include
 LIBS = -I/usr/include/cryptopp -I $(HDIR)
@@ -8,23 +7,30 @@ BDIR = bin
 SUBDIRS = net queries
 
 CC = @g++
+CSRCS = $(filter-out $(wildcard $(SDIR)/client/main.cpp),$(wildcard $(SDIR)/*.cpp) $(wildcard $(foreach SUBDIR,$(SUBDIRS) client,$(SDIR)/$(SUBDIR)/*.cpp)))
+COBJS = $(patsubst $(SDIR)/%.cpp,$(ODIR)/%.o,$(CSRCS))
 CPSRCS = $(filter-out $(wildcard $(SDIR)/client-proxy/main.cpp),$(wildcard $(SDIR)/*.cpp) $(wildcard $(foreach SUBDIR,$(SUBDIRS) client-proxy,$(SDIR)/$(SUBDIR)/*.cpp)))
 CPOBJS = $(patsubst $(SDIR)/%.cpp,$(ODIR)/%.o,$(CPSRCS))
 SPSRCS = $(filter-out $(wildcard $(SDIR)/server-proxy/main.cpp),$(wildcard $(SDIR)/*.cpp) $(wildcard $(foreach SUBDIR,$(SUBDIRS) server-proxy,$(SDIR)/$(SUBDIR)/*.cpp)))
 SPOBJS = $(patsubst $(SDIR)/%.cpp,$(ODIR)/%.o,$(SPSRCS))
 
 
-all: $(BDIR)/client-proxy $(BDIR)/server-proxy
+all: $(BDIR)/client $(BDIR)/client-proxy $(BDIR)/server-proxy
+
+$(BDIR)/client: $(SDIR)/client/main.cpp $(COBJS)
+	@mkdir -p $(dir $@)
+	@echo -n "Linking $@... "
+	$(CC) $(FLAGS) $(LIBS) $^ -o $@ && echo "OK" || echo "FAIL"
 
 $(BDIR)/client-proxy: $(SDIR)/client-proxy/main.cpp $(CPOBJS)
 	@mkdir -p $(dir $@)
 	@echo -n "Linking $@... "
-	$(CC) $(FLAGS) $(LIBS) $^ -o $@ $(LIBFLAGS) && echo "OK" || echo "FAIL"
+	$(CC) $(FLAGS) $(LIBS) $^ -o $@ -lcryptopp && echo "OK" || echo "FAIL"
 
 $(BDIR)/server-proxy: $(SDIR)/server-proxy/main.cpp $(SPOBJS)
 	@mkdir -p $(dir $@)
 	@echo -n "Linking $@... "
-	$(CC) $(FLAGS) $(LIBS) $^ -o $@ $(LIBFLAGS) && echo "OK" || echo "FAIL"
+	$(CC) $(FLAGS) $(LIBS) $^ -o $@ -lcryptopp && echo "OK" || echo "FAIL"
 
 
 -include $(ODIR)/*.d

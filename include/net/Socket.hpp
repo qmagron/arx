@@ -3,28 +3,8 @@
 
 #include <string>
 
+#include "net/Packet.hpp"
 #include "Exception.hpp"
-
-
-struct Packet {
-  size_t size;
-  void* data;
-
-  Packet() = default;
-  ~Packet() {
-    free(this->data);
-  }
-  Packet(const Packet& other) noexcept {
-    this->size = other.size;
-    this->data = malloc(other.size);
-    memcpy(this->data, other.data, other.size);
-  }
-  Packet(Packet&& other) noexcept {
-    this->size = other.size;
-    this->data = other.data;
-    other.data = nullptr;
-  }
-};
 
 
 class Socket {
