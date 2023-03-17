@@ -1,4 +1,4 @@
-#include "client/ClientProxy.hpp"
+#include "client-proxy/ClientProxy.hpp"
 
 
 constexpr unsigned int IN_PORT = 1234;

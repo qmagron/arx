@@ -1,4 +1,4 @@
-#include "client/ClientProxy.hpp"
+#include "client-proxy/ClientProxy.hpp"
 
 
 ClientProxy::ClientProxy(unsigned int inPort, unsigned int outPort): Proxy(inPort, outPort) {}

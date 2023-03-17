@@ -1,4 +1,4 @@
-#include "server/ServerProxy.hpp"
+#include "server-proxy/ServerProxy.hpp"
 
 
 constexpr unsigned int IN_PORT = 1236;

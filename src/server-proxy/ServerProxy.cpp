@@ -1,4 +1,4 @@
-#include "server/ServerProxy.hpp"
+#include "server-proxy/ServerProxy.hpp"
 
 
 ServerProxy::ServerProxy(unsigned int inPort, unsigned int outPort): Proxy(inPort, outPort) {}
