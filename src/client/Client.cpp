@@ -3,7 +3,7 @@
 #include "client/Client.hpp"
 
 
-Client::Client(unsigned short outPort, unsigned short remotePort, const std::string &remoteHost){//}: outSocket(new Socket(outPort)) {
+Client::Client(unsigned short outPort, unsigned short remotePort, const std::string &remoteHost): outSocket(new Socket(outPort)) {
   this->outSocket->connect(remoteHost, remotePort);
 }
 
