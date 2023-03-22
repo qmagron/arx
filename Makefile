@@ -1,4 +1,4 @@
-FLAGS = -std=c++2a
+FLAGS = -std=c++2a -g -O2 -lcryptopp -lpthread
 SDIR = src
 HDIR = include
 LIBS = -I/usr/include/cryptopp -I $(HDIR)
@@ -20,17 +20,17 @@ all: $(BDIR)/client $(BDIR)/client-proxy $(BDIR)/server-proxy
 $(BDIR)/client: $(SDIR)/client/main.cpp $(COBJS)
 	@mkdir -p $(dir $@)
 	@echo -n "Linking $@... "
-	$(CC) $(FLAGS) $(LIBS) $^ -o $@ && echo "OK" || echo "FAIL"
+	$(CC) $(LIBS) $^ -o $@  $(FLAGS) && echo "OK" || echo "FAIL"
 
 $(BDIR)/client-proxy: $(SDIR)/client-proxy/main.cpp $(CPOBJS)
 	@mkdir -p $(dir $@)
 	@echo -n "Linking $@... "
-	$(CC) $(FLAGS) $(LIBS) $^ -o $@ -lcryptopp && echo "OK" || echo "FAIL"
+	$(CC)  $(LIBS) $^ -o $@ $(FLAGS) && echo "OK" || echo "FAIL"
 
 $(BDIR)/server-proxy: $(SDIR)/server-proxy/main.cpp $(SPOBJS)
 	@mkdir -p $(dir $@)
 	@echo -n "Linking $@... "
-	$(CC) $(FLAGS) $(LIBS) $^ -o $@ -lcryptopp && echo "OK" || echo "FAIL"
+	$(CC)  $(LIBS) $^ -o $@ $(FLAGS) && echo "OK" || echo "FAIL"
 
 
 -include $(ODIR)/*.d
