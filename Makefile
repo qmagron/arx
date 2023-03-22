@@ -1,10 +1,11 @@
 FLAGS = -std=c++2a -g -O2 -lcryptopp -lpthread
 SDIR = src
 HDIR = include
-LIBS = -I/usr/include/cryptopp -I $(HDIR)
+LIBS = -I/usr/include/cryptopp -I$(HDIR) -I$(LDIR)/tinygarble/include
 ODIR = obj
 BDIR = bin
 SUBDIRS = net queries
+LDIR = lib
 
 CC = @g++
 CSRCS = $(filter-out $(wildcard $(SDIR)/client/main.cpp),$(wildcard $(SDIR)/*.cpp) $(wildcard $(foreach SUBDIR,$(SUBDIRS) client,$(SDIR)/$(SUBDIR)/*.cpp)))
@@ -20,17 +21,20 @@ all: $(BDIR)/client $(BDIR)/client-proxy $(BDIR)/server-proxy
 $(BDIR)/client: $(SDIR)/client/main.cpp $(COBJS)
 	@mkdir -p $(dir $@)
 	@echo -n "Linking $@... "
-	$(CC) $(LIBS) $^ -o $@  $(FLAGS) && echo "OK" || echo "FAIL"
+	$(CC) $(LIBS) $^ -o $@ $(FLAGS) && echo "OK" || echo "FAIL"
 
 $(BDIR)/client-proxy: $(SDIR)/client-proxy/main.cpp $(CPOBJS)
 	@mkdir -p $(dir $@)
 	@echo -n "Linking $@... "
-	$(CC)  $(LIBS) $^ -o $@ $(FLAGS) && echo "OK" || echo "FAIL"
+	$(CC) $(LIBS) $^ -o $@ $(FLAGS) && echo "OK" || echo "FAIL"
 
-$(BDIR)/server-proxy: $(SDIR)/server-proxy/main.cpp $(SPOBJS)
+$(BDIR)/server-proxy: $(SDIR)/server-proxy/main.cpp $(SPOBJS) $(LDIR)/tinygarble/lib/libemp-tool.so
 	@mkdir -p $(dir $@)
 	@echo -n "Linking $@... "
-	$(CC)  $(LIBS) $^ -o $@ $(FLAGS) && echo "OK" || echo "FAIL"
+	$(CC) $(LIBS) $^ -o $@ $(FLAGS) -lemp-tool -lssl -lcrypto -lboost_program_options -L$(LDIR)/tinygarble/lib && echo "OK" || echo "FAIL"
+
+$(LDIR)/tinygarble/lib/libemp-tool.so: deps.sh
+	@./deps.sh install
 
 
 -include $(ODIR)/*.d
@@ -42,6 +46,7 @@ $(ODIR)/%.o: $(SDIR)/%.cpp $(HDIR)/%.hpp
 
 
 clean:
+	@./deps.sh uninstall
 	rm -rf $(ODIR) $(BDIR)
 
 
