@@ -12,6 +12,12 @@ using CryptoPP::StreamTransformationFilter;
 using CryptoPP::StringSink;
 using CryptoPP::StringSource;
 
+
+#ifdef __CRYPTOPP_BYTE__
+using byte = CryptoPP::byte;
+#endif
+
+
 std::string Crypto::encryptBASE(std::string message, byte counter[4]) {
   std::string cipher;
 

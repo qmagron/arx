@@ -5,6 +5,12 @@
 #include <cryptopp/aes.h>
 #include <map>
 
+
+#ifdef __CRYPTOPP_BYTE__
+using byte = CryptoPP::byte;
+#endif
+
+
 class ClientProxy : public Proxy {
 private:
   std::map<std::string, std::map<std::string, int>> *value_counters;

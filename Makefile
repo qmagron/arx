@@ -1,3 +1,4 @@
+include .env
 
 
 FLAGS = -std=c++2a -g -O2 -lcryptopp -lpthread
@@ -9,11 +10,8 @@ ODIR = obj
 BDIR = bin
 SUBDIRS = net queries
 LDIR = lib
--include .env
 
-ifdef $(__CRYPTOPP_BYTE__)
-	FLAGS+= -D__CRYPTOPP_BYTE__
-endif
+
 CC = @g++
 CSRCS = $(filter-out $(wildcard $(SDIR)/client/main.cpp),$(wildcard $(SDIR)/*.cpp) $(wildcard $(foreach SUBDIR,$(SUBDIRS) client,$(SDIR)/$(SUBDIR)/*.cpp)))
 COBJS = $(patsubst $(SDIR)/%.cpp,$(ODIR)/%.o,$(CSRCS))
@@ -23,7 +21,12 @@ SPSRCS = $(filter-out $(wildcard $(SDIR)/server-proxy/main.cpp),$(wildcard $(SDI
 SPOBJS = $(patsubst $(SDIR)/%.cpp,$(ODIR)/%.o,$(SPSRCS))
 
 
-all: $(BDIR)/client $(BDIR)/client-proxy $(BDIR)/server-proxy
+all: setup $(BDIR)/client $(BDIR)/client-proxy $(BDIR)/server-proxy
+
+setup:
+ifdef __CRYPTOPP_BYTE__
+FLAGS+= -D__CRYPTOPP_BYTE__
+endif
 
 $(BDIR)/client: $(SDIR)/client/main.cpp $(COBJS)
 	@mkdir -p $(dir $@)
@@ -40,7 +43,7 @@ $(BDIR)/server-proxy: $(SDIR)/server-proxy/main.cpp $(SPOBJS) $(LDIR)/tinygarble
 	@echo -n "Linking $@... "
 	$(CC) $(LIBS) $^ -o $@ $(FLAGS) -lemp-tool -lssl -lcrypto -lboost_program_options -L$(LDIR)/tinygarble/lib && echo "OK" || echo "FAIL"
 
-$(LDIR)/tinygarble/lib/libemp-tool.so: deps.sh
+$(LDIR)/tinygarble/lib/libemp-tool.so:
 	@./deps.sh install
 
 
@@ -57,4 +60,4 @@ clean:
 	rm -rf $(ODIR) $(BDIR)
 
 
-.PHONY: all clean
+.PHONY: all setup clean

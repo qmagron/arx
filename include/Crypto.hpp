@@ -6,11 +6,13 @@
 #include <iostream>
 #include <string>
 
+
 using CryptoPP::AES;
 
 #ifdef __CRYPTOPP_BYTE__
-using CryptoPP::byte;
+using byte = CryptoPP::byte;
 #endif
+
 
 namespace Crypto {
 // 128 bit array key of 59E22E9D3351B9B46627F49DA8BF56D4
