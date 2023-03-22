@@ -4,7 +4,6 @@
 #include <cryptopp/filters.h>
 #include <cryptopp/osrng.h>
 
-
 using CryptoPP::AutoSeededRandomPool;
 
 using CryptoPP::CTR_Mode;
@@ -13,10 +12,10 @@ using CryptoPP::StreamTransformationFilter;
 using CryptoPP::StringSink;
 using CryptoPP::StringSource;
 
-std::string Crypto::encryptBASE(std::string message, CryptoPP::byte counter[4]) {
+std::string Crypto::encryptBASE(std::string message, byte counter[4]) {
   std::string cipher;
 
-  CryptoPP::byte fullIV[16];
+  byte fullIV[16];
 
   // merge counter and iv into fullIV
   for (int i = 0; i < 12; i++) {
@@ -47,10 +46,10 @@ std::string Crypto::encryptBASE(std::string message, CryptoPP::byte counter[4]) 
   return cipher;
 }
 
-std::string Crypto::decryptBASE(std::string cipher, CryptoPP::byte counter[4]) {
+std::string Crypto::decryptBASE(std::string cipher, byte counter[4]) {
   std::string recovered;
 
-  CryptoPP::byte fullIV[16];
+  byte fullIV[16];
 
   // merge counter and iv into fullIV
   for (int i = 0; i < 12; i++) {

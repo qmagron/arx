@@ -8,7 +8,7 @@
 class ClientProxy : public Proxy {
 private:
   std::map<std::string, std::map<std::string, int>> *value_counters;
-  std::map<std::string, std::array<CryptoPP::byte, 16>> field_keys;
+  std::map<std::string, std::array<byte, 16>> field_keys;
   std::map<std::string, std::string> field_encryptedname;
 
 protected:

@@ -1,4 +1,7 @@
+
+
 FLAGS = -std=c++2a -g -O2 -lcryptopp -lpthread
+
 SDIR = src
 HDIR = include
 LIBS = -I/usr/include/cryptopp -I$(HDIR) -I$(LDIR)/tinygarble/include
@@ -6,7 +9,11 @@ ODIR = obj
 BDIR = bin
 SUBDIRS = net queries
 LDIR = lib
+-include .env
 
+ifdef $(__CRYPTOPP_BYTE__)
+	FLAGS+= -D__CRYPTOPP_BYTE__
+endif
 CC = @g++
 CSRCS = $(filter-out $(wildcard $(SDIR)/client/main.cpp),$(wildcard $(SDIR)/*.cpp) $(wildcard $(foreach SUBDIR,$(SUBDIRS) client,$(SDIR)/$(SUBDIR)/*.cpp)))
 COBJS = $(patsubst $(SDIR)/%.cpp,$(ODIR)/%.o,$(CSRCS))
@@ -42,7 +49,7 @@ $(LDIR)/tinygarble/lib/libemp-tool.so: deps.sh
 $(ODIR)/%.o: $(SDIR)/%.cpp $(HDIR)/%.hpp
 	@mkdir -p $(dir $@)
 	@echo -n "Compiling $@... "
-	$(CC) $(FLAGS) -c $(LIBS) -MMD -o $@ $< $(LIBFLAGS) && echo "OK" || echo "FAIL"
+	$(CC) $(FLAGS) -c $(LIBS) -MMD -o $@ $< $(LIBFLAGS)  && echo "OK" || echo "FAIL"
 
 
 clean:
