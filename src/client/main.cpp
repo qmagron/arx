@@ -2,15 +2,6 @@
 
 #include "client/Client.hpp"
 
-#include "Crypto.hpp"
-
-#include "filters.h"
-using CryptoPP::StringSink;
-using CryptoPP::StringSource;
-
-#include "hex.h"
-using CryptoPP::HexEncoder;
-
 constexpr unsigned int OUT_PORT = 1234;
 constexpr unsigned int REMOTE_PORT = 1235;
 
