@@ -5,6 +5,10 @@
 #include <cstddef>
 #include <iostream>
 #include <string>
+#include "queries/InsertQuery.hpp"
+#include "queries/SelectQuery.hpp"
+#include "queries/UpdateQuery.hpp"
+#include "queries/DeleteQuery.hpp"
 
 
 using CryptoPP::AES;
@@ -24,6 +28,11 @@ inline byte iv[16] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 std::string encryptBASE(std::string, byte[4]);
 std::string decryptBASE(std::string, byte[4]);
+
+InsertQuery encryptQuery(InsertQuery,std::map<std::string,std::string>);
+UpdateQuery encryptQuery(UpdateQuery,std::map<std::string,std::string>);
+DeleteQuery encryptQuery(DeleteQuery,std::map<std::string,std::string>);
+SelectQuery encryptQuery(SelectQuery,std::map<std::string,std::string>);
 
 } // namespace Crypto
 

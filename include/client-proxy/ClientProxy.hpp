@@ -11,6 +11,8 @@ using byte = CryptoPP::byte;
 #endif
 
 
+
+
 class ClientProxy : public Proxy {
 private:
   std::map<std::string, std::map<std::string, int>> *value_counters;
@@ -22,6 +24,7 @@ protected:
 
 public:
   ClientProxy(unsigned short inPort, unsigned short outPort);
+  ~ClientProxy() = default;
 };
 
 #endif

@@ -7,6 +7,7 @@
 
 ClientProxy::ClientProxy(unsigned short inPort, unsigned short outPort)
     : Proxy(inPort, outPort) {
+  
   value_counters = new std::map<std::string, std::map<std::string, int>>();
   std::fstream file;
 
