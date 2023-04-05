@@ -17,7 +17,7 @@ CSRCS = $(filter-out $(wildcard $(SDIR)/client/main.cpp),$(wildcard $(SDIR)/*.cp
 COBJS = $(patsubst $(SDIR)/%.cpp,$(ODIR)/%.o,$(CSRCS))
 CPSRCS = $(filter-out $(wildcard $(SDIR)/client-proxy/main.cpp),$(wildcard $(SDIR)/*.cpp) $(wildcard $(foreach SUBDIR,$(SUBDIRS) client-proxy,$(SDIR)/$(SUBDIR)/*.cpp)))
 CPOBJS = $(patsubst $(SDIR)/%.cpp,$(ODIR)/%.o,$(CPSRCS))
-SPSRCS = $(filter-out $(wildcard $(SDIR)/server-proxy/main.cpp),$(wildcard $(SDIR)/*.cpp) $(wildcard $(foreach SUBDIR,$(SUBDIRS) server-proxy,$(SDIR)/$(SUBDIR)/*.cpp)))
+SPSRCS = $(filter-out $(wildcard $(SDIR)/server-proxy/main.cpp),$(wildcard $(SDIR)/*.cpp) $(wildcard $(foreach SUBDIR,$(SUBDIRS) server-proxy server-proxy/indexes,$(SDIR)/$(SUBDIR)/*.cpp)))
 SPOBJS = $(patsubst $(SDIR)/%.cpp,$(ODIR)/%.o,$(SPSRCS))
 
 
@@ -56,8 +56,10 @@ $(ODIR)/%.o: $(SDIR)/%.cpp $(HDIR)/%.hpp
 
 
 clean:
-	@./deps.sh uninstall
 	rm -rf $(ODIR) $(BDIR)
 
+uninstall:
+	@./deps.sh uninstall
 
-.PHONY: all setup clean
+
+.PHONY: all setup clean uninstall

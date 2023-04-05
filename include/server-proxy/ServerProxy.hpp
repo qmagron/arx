@@ -2,9 +2,14 @@
 #define __SERVER_PROXY_HPP__
 
 #include "Proxy.hpp"
+#include "indexes/ArxRange.hpp"
 
 
 class ServerProxy: public Proxy {
+ private:
+  // Indexes
+  ArxRange<uint64_t> arxRange = {};
+
  protected:
   Packet forward(const Packet &inPacket) override;
 
