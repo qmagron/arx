@@ -7,15 +7,12 @@
 
 class SelectQuery : public GenericQuery {
 private:
-  std::string table;
-  std::vector<std::string> columns;
-  std::vector<std::string> whereClauses;
-  std::string order;
-  std::string limit;
-  std::string offset;
+    std::string table;
+    std::vector<whereClause> clauses;
+    std::vector<std::string> boolOperators;
 
 public:
-    SelectQuery(std::string);
+    SelectQuery(std::string,std::string);
     ~SelectQuery() = default;    
 };
 

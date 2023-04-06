@@ -11,7 +11,7 @@ constexpr unsigned int REMOTE_PORT = 1237;
 
 int main() {
   ClientProxy client(IN_PORT, OUT_PORT);  
-  QueryBuilder::buildQuery("Delete from caca where zizi=1 and zizi=0;");
+  QueryBuilder::buildQuery("Update caca Set zizi=1,prout = 'zaza' where zizi=2;");
 
   //client.start(REMOTE_PORT);
 

@@ -12,13 +12,13 @@ GenericQuery QueryBuilder::buildQuery(std::string query) {
   boost::split(type, query, boost::is_any_of(" "));
 
   if (boost::iequals(type[0], "SELECT")) {
-    return SelectQuery(query);
+    return SelectQuery(query,type[2]);
   } else if (boost::iequals(type[0], "UPDATE")) {
-    return UpdateQuery(query);
+    return UpdateQuery(query,type[2]);
   } else if (boost::iequals(type[0], "DELETE")) {
-    return DeleteQuery(query);
+    return DeleteQuery(query,type[2]);
   } else if (boost::iequals(type[0], "INSERT")) {
-    return InsertQuery(query);
+    return InsertQuery(query,type[2]);
   } else {
     std::cerr << "Query could not be parsed" << std::endl;
     throw std::exception();

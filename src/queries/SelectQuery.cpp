@@ -1,18 +1,44 @@
 #include "queries/SelectQuery.hpp"
 #include "string"
 #include <boost/algorithm/string.hpp>
+#include <boost/regex.hpp>
+#include <iostream>
 
 // parse the query and store its elements in the class with the constructor
-SelectQuery::SelectQuery(std::string query) {
-  std::vector<std::string> tokens;
-  boost::split(tokens, query, boost::is_any_of(" "));
-  std::vector<std::string> columns;
-  boost::split(columns, tokens[1], boost::is_any_of(","));
-  for (int i = 0; i != columns.size(); ++i) {
-    this->columns.push_back(columns[i]);
+SelectQuery::SelectQuery(std::string query,std::string table) {
+  this->table = table;
+  std::string queryCopy = query;
+  clauses = std::vector<whereClause>();
+  boolOperators = std::vector<std::string>();
+  // regex to check wether or not the query matches the delete syntax
+  boost::regex expr{
+      "(?i)select\\s+(([a-zA-Z]+(,[a-zA-Z]+)*)|\\*) "
+      "from\\s+[a-zA-Z]+((\\s*where\\s*[a-zA-Z]+(=|<=|>=)(\"[a-zA-z0-9]+\"|[0-9]+)"
+      "+)\\s*((and|or)\\s*[a-zA-Z]+(=|<=|>=)[a-zA-z0-9]+)*)?\\s*;"};
+  // expression to catch relevant fields from the query
+  boost::regex whereExpr{
+      "([a-zA-Z]+)\\s*(=|<=|>=)\\s*(\"[a-zA-z0-9]+\"|[0-9]+)"};
+  // expression to catch boolean operators
+  boost::regex boolExpr{"(?i)(and|or)(?-i)"};
+  boost::smatch caughtClauses;
+  boost::smatch boolOp;
+  
+  if (boost::regex_match(query, expr)) {
+    while (boost::regex_search(query, caughtClauses, whereExpr)) {
+      clauses.push_back(
+          whereClause{caughtClauses[1], caughtClauses[2], caughtClauses[3]});
+      query = caughtClauses.suffix().str();
+    }
+
+    while (boost::regex_search(queryCopy, boolOp, boolExpr)) {
+      boolOperators.push_back(boolOp[1]);
+      queryCopy = boolOp.suffix().str();
+    }
+
+  } else {
+    std::cerr << "Syntax error on Select Query" << std::endl;
+    throw std::exception();
   }
-  this->table = tokens[3];
-  std::vector<std::string> where;
-  boost::split(where, tokens[5], boost::is_any_of("="));
+
   
 }

@@ -10,9 +10,10 @@ class DeleteQuery : public GenericQuery {
 private:
     std::string table;
     std::vector<whereClause> clauses;
+    std::vector<std::string> boolOperators;
 
 public:
-    DeleteQuery(std::string);
+    DeleteQuery(std::string,std::string);
     ~DeleteQuery() = default;
 };
 

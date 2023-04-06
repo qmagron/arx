@@ -4,10 +4,11 @@
 #include <iostream>
 #include <vector>
 
-DeleteQuery::DeleteQuery(std::string query) : GenericQuery() {
+DeleteQuery::DeleteQuery(std::string query, std::string table) : GenericQuery() {
+  this->table = table;
   std::string  queryCopy = query;
-  std::vector<whereClause> clausesVector = std::vector<whereClause>();
-  std::vector<std::string> booleanOperators = std::vector<std::string>();
+  clauses = std::vector<whereClause>();
+  boolOperators = std::vector<std::string>();
   // regex to check wether or not the query matches the delete syntax
   boost::regex expr{"(?i)delete\\s+from\\s+(?-i)[a-zA-Z]+(((?i)\\s*where\\s*(?-"
                     "i)[a-zA-Z]+(=|<=|>=)(\"[a-zA-z0-9]+\"|[0-9]+)+)\\s*(((?i)"
@@ -17,16 +18,16 @@ DeleteQuery::DeleteQuery(std::string query) : GenericQuery() {
       "([a-zA-Z]+)\\s*(=|<=|>=)\\s*(\"[a-zA-z0-9]+\"|[0-9]+)"};
   // expression to catch boolean operators
   boost::regex boolExpr{"(?i)(and|or)(?-i)"};
-  boost::smatch clauses;
+  boost::smatch caughtClauses;
   boost::smatch boolOp;
   if (boost::regex_match(query, expr)) {
-    while (boost::regex_search(query, clauses, whereExpr)) {
-      clausesVector.push_back(whereClause{clauses[1], clauses[2], clauses[3]});
-      query = clauses.suffix().str();
+    while (boost::regex_search(query, caughtClauses, whereExpr)) {
+      clauses.push_back(whereClause{caughtClauses[1], caughtClauses[2], caughtClauses[3]});
+      query = caughtClauses.suffix().str();
     }
 
     while (boost::regex_search(queryCopy, boolOp, boolExpr)) {
-      booleanOperators.push_back(boolOp[1]);
+      boolOperators.push_back(boolOp[1]);
       queryCopy = boolOp.suffix().str();
     }
     
@@ -36,5 +37,4 @@ DeleteQuery::DeleteQuery(std::string query) : GenericQuery() {
     throw std::exception();
   }
 
-  // TODO assign the vectors to attributes
 }
