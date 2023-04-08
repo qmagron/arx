@@ -12,7 +12,7 @@ constexpr bool UP = true;
 
 template<size_t n, size_t k>
 BGCC<n,k> generateBGCC(const Circuit<n,1>& C, const std::array<CipherText<k>, n>& e0, const std::array<CipherText<k>, n>& e1) {
-  constexpr std::bitset<n> x0, x1((1<<n) - 1);
+  constexpr std::bitset<n> x0, x1(-1);
 
   std::vector<CipherPair<k>> W;
   BGCC<n,k> bgcc {garble<n,1,k>(C, &W)};
@@ -71,5 +71,5 @@ bool evaluateBGCC(std::array<CipherText<k>, n>& X, const Circuit<n,1>& C, const 
 
 // NOTE Templates instanciations are required
 
-template BGCC<2,GCK> generateBGCC(const Circuit<2,1>&, const std::array<CipherText<GCK>, 2>&, const std::array<CipherText<GCK>, 2>&);
-template bool evaluateBGCC(std::array<CipherText<GCK>, 2>&, const Circuit<2,1>&, const GarbledTable<GCK>&, const CipherText<1>&, const TransitionTable<2,GCK>&);
+template BGCC<GCN,GCK> generateBGCC(const Circuit<GCN,1>&, const std::array<CipherText<GCK>, GCN>&, const std::array<CipherText<GCK>, GCN>&);
+template bool evaluateBGCC(std::array<CipherText<GCK>, GCN>&, const Circuit<GCN,1>&, const GarbledTable<GCK>&, const CipherText<1>&, const TransitionTable<GCN,GCK>&);

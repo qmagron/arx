@@ -1,7 +1,7 @@
 include .env
 
 
-FLAGS = -std=c++2a -g -O2 -lcryptopp -lpthread -lboost_regex -DGCK=64
+FLAGS = -std=c++2a -g -O2 -lcryptopp -lpthread -lboost_regex -DGCK=32 -DGCN=32
 
 SDIR = src
 HDIR = include
