@@ -17,24 +17,25 @@ constexpr size_t nB() {
 }
 
 
-template<size_t k>
-void hash(std::bitset<k>& out, const std::bitset<k>& in) {
-  byte inB[nB<k>()];
-  byte outB[nB<k>()];
+template<size_t n, size_t m>
+void hash(std::bitset<m>& out, const std::bitset<n>& in) {
+  byte inB[nB<n>()];
+  byte outB[nB<m>()];
 
   // Convert bitset to byte array
-  pad<k>(inB, in, nB<k>());
+  pad(inB, in, nB<n>());
 
   // Perform hash
   Keccak_256 hash;
-  hash.Update(inB, nB<k>());
-  hash.TruncatedFinal(outB, nB<k>());
+  hash.Update(inB, nB<n>());
+  hash.TruncatedFinal(outB, nB<m>());
 
   // Convert byte array to bitset
-  trunc<k>(out, outB, nB<k>());
+  trunc(out, outB, nB<m>());
 }
 
 
 /* ---------- Template instanciations ---------- */
 
 template void hash(std::bitset<GCK>& out, const std::bitset<GCK>& in);
+template void hash(std::bitset<GCK>& out, const std::bitset<2*GCK>& in);
