@@ -5,11 +5,10 @@ FLAGS = -std=c++2a -g -O2 -lcryptopp -lpthread -lboost_regex
 
 SDIR = src
 HDIR = include
-LIBS = -I/usr/include/cryptopp -I$(HDIR) -I$(LDIR)/tinygarble/include
+LIBS = -I/usr/include/cryptopp -I$(HDIR)
 ODIR = obj
 BDIR = bin
-SUBDIRS = net queries
-LDIR = lib
+SUBDIRS = net queries crypto
 
 
 CC = @g++
@@ -38,13 +37,10 @@ $(BDIR)/client-proxy: $(SDIR)/client-proxy/main.cpp $(CPOBJS)
 	@echo -n "Linking $@... "
 	$(CC) $(LIBS) $^ -o $@ $(FLAGS) && echo "OK" || echo "FAIL"
 
-$(BDIR)/server-proxy: $(SDIR)/server-proxy/main.cpp $(SPOBJS) $(LDIR)/tinygarble/lib/libemp-tool.so
+$(BDIR)/server-proxy: $(SDIR)/server-proxy/main.cpp $(SPOBJS)
 	@mkdir -p $(dir $@)
 	@echo -n "Linking $@... "
-	$(CC) $(LIBS) $^ -o $@ $(FLAGS) -lemp-tool -lssl -lcrypto -lboost_program_options -L$(LDIR)/tinygarble/lib && echo "OK" || echo "FAIL"
-
-$(LDIR)/tinygarble/lib/libemp-tool.so:
-	@./deps.sh install
+	$(CC) $(LIBS) $^ -o $@ $(FLAGS) && echo "OK" || echo "FAIL"
 
 
 -include $(ODIR)/*.d
@@ -58,8 +54,5 @@ $(ODIR)/%.o: $(SDIR)/%.cpp $(HDIR)/%.hpp
 clean:
 	rm -rf $(ODIR) $(BDIR)
 
-uninstall:
-	@./deps.sh uninstall
 
-
-.PHONY: all setup clean uninstall
+.PHONY: all setup clean
