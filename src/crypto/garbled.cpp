@@ -9,14 +9,22 @@ constexpr bool UP = true;
 
 
 template<size_t n, size_t m, size_t k>
-GarbledCircuit<n,m,k> garble(const Circuit<n,m>& C) {
+GarbledCircuit<n,m,k> garble(const Circuit<n,m>& C, std::vector<CipherPair<k>>* pW) {
   GarbledCircuit<n,m,k> gC {C};
+
+  bool deleteW = false;
+  if (pW == nullptr) {
+    deleteW = true;
+    pW = new std::vector<CipherPair<k>> {C.nWires};
+  } else {
+    pW->resize(C.nWires);
+  }
 
   auto& G = gC.G;
   auto& e = gC.e;
   auto& d = gC.d;
   auto& R = gC.R;
-  std::vector<CipherPair<k>> W {C.nWires};
+  auto& W = *pW;
 
   R = random_bitset<k>();
   R[0] = 1;
@@ -50,6 +58,10 @@ GarbledCircuit<n,m,k> garble(const Circuit<n,m>& C) {
     d[m-o-1] = W[C.out[o]][DOWN][0];
   }
 
+  if (deleteW) {
+    delete pW;
+  }
+
   return gC;
 }
 
@@ -79,9 +91,16 @@ std::bitset<m> decode(const std::array<CipherText<k>, m>& Y, const CipherText<m>
 
 
 template<size_t n, size_t m, size_t k>
-std::array<CipherText<k>, m> evaluate(const std::array<CipherText<k>, n>& X, const Circuit<n,m>& C, const GarbledTable<k>& G) {
-  std::vector<CipherText<k>> W {C.nWires};
-  W.resize(C.nWires);
+std::array<CipherText<k>, m> evaluate(const std::array<CipherText<k>, n>& X, const Circuit<n,m>& C, const GarbledTable<k>& G, std::vector<CipherText<k>>* pW) {
+  bool deleteW = false;
+  if (pW == nullptr) {
+    deleteW = true;
+    pW = new std::vector<CipherText<k>> {C.nWires};
+  } else {
+    pW->resize(C.nWires);
+  }
+
+  auto& W = *pW;
   size_t t = 0;
 
   // Recover input labels
@@ -106,6 +125,10 @@ std::array<CipherText<k>, m> evaluate(const std::array<CipherText<k>, n>& X, con
   std::array<CipherText<k>, m> Y;
   for (size_t o = 0; o < m; ++o) {
     Y[o] = W[C.out[o]];
+  }
+
+  if (deleteW) {
+    delete pW;
   }
 
   return Y;
@@ -177,7 +200,7 @@ inline void dHalfAND(std::vector<CipherText<k>>& W, const Gate2& g, const Garble
 
 // NOTE Templates instanciations are required
 
-// template GarbledCircuit<2,1,GCK> garble(const Circuit<2,1>&);
-// template std::array<CipherText<GCK>, 2> encode(const std::bitset<2>&, const std::array<CipherText<GCK>, 2>&, const CipherText<GCK>&);
-// template std::array<CipherText<GCK>, 1> evaluate(const std::array<CipherText<GCK>, 2>&, const Circuit<2,1>&, const GarbledTable<GCK>&);
-// template std::bitset<1> decode(const std::array<CipherText<GCK>, 1>&, const CipherText<1>&);
+template GarbledCircuit<2,1,GCK> garble(const Circuit<2,1>&, std::vector<CipherPair<GCK>>*);
+template std::array<CipherText<GCK>, 2> encode(const std::bitset<2>&, const std::array<CipherText<GCK>, 2>&, const CipherText<GCK>&);
+template std::array<CipherText<GCK>, 1> evaluate(const std::array<CipherText<GCK>, 2>&, const Circuit<2,1>&, const GarbledTable<GCK>&, std::vector<CipherText<GCK>>*);
+template std::bitset<1> decode(const std::array<CipherText<GCK>, 1>&, const CipherText<1>&);
