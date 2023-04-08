@@ -177,7 +177,7 @@ inline void dHalfAND(std::vector<CipherText<k>>& W, const Gate2& g, const Garble
 
 // NOTE Templates instanciations are required
 
-// template GarbledCircuit<2,1,K> garble(const Circuit<2,1>&);
-// template std::array<CipherText<K>, 2> encode(const std::bitset<2>&, const std::array<CipherText<K>, 2>&, const CipherText<K>&);
-// template std::array<CipherText<K>, 1> evaluate(const std::array<CipherText<K>, 2>&, const Circuit<2,1>&, const GarbledTable<K>&);
-// template std::bitset<1> decode(const std::array<CipherText<K>, 1>&, const CipherText<1>&);
+// template GarbledCircuit<2,1,GCK> garble(const Circuit<2,1>&);
+// template std::array<CipherText<GCK>, 2> encode(const std::bitset<2>&, const std::array<CipherText<GCK>, 2>&, const CipherText<GCK>&);
+// template std::array<CipherText<GCK>, 1> evaluate(const std::array<CipherText<GCK>, 2>&, const Circuit<2,1>&, const GarbledTable<GCK>&);
+// template std::bitset<1> decode(const std::array<CipherText<GCK>, 1>&, const CipherText<1>&);
