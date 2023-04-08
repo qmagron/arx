@@ -37,4 +37,4 @@ void hash(std::bitset<k>& out, const std::bitset<k>& in) {
 
 /* ---------- Template instanciations ---------- */
 
-template void hash(std::bitset<64> &out, const std::bitset<64> &in);
+template void hash(std::bitset<K> &out, const std::bitset<K> &in);

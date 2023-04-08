@@ -53,7 +53,7 @@ std::bitset<k> operator*(bool a, const std::bitset<k> &b) {
 
 /* ---------- Template instanciations ---------- */
 
-template std::bitset<64> random_bitset();
-template std::bitset<64> trunc(std::bitset<64>&, const byte*, size_t len);
-template byte* pad(byte*, const std::bitset<64>&, size_t);
-template std::bitset<64> operator*(bool, const std::bitset<64>&);
+template std::bitset<K> random_bitset();
+template std::bitset<K> trunc(std::bitset<K>&, const byte*, size_t len);
+template byte* pad(byte*, const std::bitset<K>&, size_t);
+template std::bitset<K> operator*(bool, const std::bitset<K>&);

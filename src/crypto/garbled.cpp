@@ -179,7 +179,7 @@ inline void dHalfAND(std::vector<Label<k>>& W, const Gate2& g, const GarbledTabl
 
 // NOTE Templates instanciations are required
 
-// template GarbledCircuit<2,1,64> garble(const Circuit<2,1>&);
-// template std::array<std::bitset<64>, 2> encode(const std::bitset<2>&, const std::array<std::bitset<64>, 2>&, const std::bitset<64>&);
-// template std::array<std::bitset<64>, 1> evaluate(const std::array<std::bitset<64>, 2>&, const Circuit<2,1>&, const GarbledTable<64>&);
-// template std::bitset<1> decode(const std::array<std::bitset<64>, 1>&, const std::bitset<1>&);
+// template GarbledCircuit<2,1,K> garble(const Circuit<2,1>&);
+// template std::array<std::bitset<K>, 2> encode(const std::bitset<2>&, const std::array<std::bitset<K>, 2>&, const std::bitset<K>&);
+// template std::array<std::bitset<K>, 1> evaluate(const std::array<std::bitset<K>, 2>&, const Circuit<2,1>&, const GarbledTable<K>&);
+// template std::bitset<1> decode(const std::array<std::bitset<K>, 1>&, const std::bitset<1>&);
