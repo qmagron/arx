@@ -24,10 +24,6 @@ struct Gate2 {
   Wire out;
 };
 
-template<size_t k> using Label      = std::bitset<k>;
-template<size_t k> using LabelsPair = std::array<Label<k>, 2>;
-
-
 /**
  * @brief A binary circuit.
  * @param n The number of input wires
@@ -46,28 +42,31 @@ struct Circuit {
   std::vector<Gate2> gates;
 };
 
+
+template<size_t k> using CipherText = std::bitset<k>;
+template<size_t k> using CipherPair = std::array<CipherText<k>, 2>;
+
 template<size_t k>
-using GarbledTable = std::vector<LabelsPair<k>>;
+using GarbledTable = std::vector<CipherPair<k>>;
+
 
 /**
  * @brief A complete garbled circuit.
  * @param n The number of input wires
  * @param m The number of output wires
  * @param k The security parameter
- * @param C The circuit
- * @param T The garbled table
+ * @param G The garbled table
  * @param e The encode information
  * @param d The decode information
  * @param R The free-XOR value
  * @note See https://ia.cr/2014/756
  */
 template<size_t n, size_t m, size_t k>
-struct GarbledCircuit {
-  Circuit<n,m> C;
-  GarbledTable<k> T = {};
-  std::array<std::bitset<k>, n> e = {};
-  std::bitset<m> d = {};
-  std::bitset<k> R = {};
+struct GarbledCircuit: public Circuit<n,m> {
+  GarbledTable<k> G = {};
+  std::array<CipherText<k>, n> e = {};
+  CipherText<m> d = {};
+  CipherText<k> R = {};
 };
 
 
@@ -94,7 +93,7 @@ GarbledCircuit<n,m,k> garble(const Circuit<n,m>& C);
  * @note See https://ia.cr/2014/756
  */
 template<size_t n, size_t k>
-std::array<std::bitset<k>, n> encode(const std::bitset<n>& x, const std::array<std::bitset<k>, n>& e, const std::bitset<k>& R);
+std::array<CipherText<k>, n> encode(const std::bitset<n>& x, const std::array<CipherText<k>, n>& e, const CipherText<k>& R);
 
 /**
  * @brief Evaluate a garbled circuit.
@@ -103,12 +102,12 @@ std::array<std::bitset<k>, n> encode(const std::bitset<n>& x, const std::array<s
  * @param[in] k The security parameter
  * @param[in] X The garbled input
  * @param[in] C The garbled circuit
- * @param[in] T The garbled table
+ * @param[in] G The garbled table
  * @return The garbled output (Y)
  * @note See https://ia.cr/2014/756
  */
 template<size_t n, size_t m, size_t k>
-std::array<std::bitset<k>, m> evaluate(const std::array<std::bitset<k>, n>& X, const Circuit<n,m>& C, const GarbledTable<k>& T);
+std::array<CipherText<k>, m> evaluate(const std::array<CipherText<k>, n>& X, const Circuit<n,m>& C, const GarbledTable<k>& G);
 
 /**
  * @brief Decode a garbled output.
@@ -120,7 +119,7 @@ std::array<std::bitset<k>, m> evaluate(const std::array<std::bitset<k>, n>& X, c
  * @note See https://ia.cr/2014/756
  */
 template<size_t m, size_t k>
-std::bitset<m> decode(const std::array<std::bitset<k>, m>& Y, const std::bitset<m>& d);
+std::bitset<m> decode(const std::array<CipherText<k>, m>& Y, const CipherText<m>& d);
 
 
 #endif
