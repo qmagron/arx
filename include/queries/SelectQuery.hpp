@@ -13,8 +13,8 @@ private:
 
 public:
   SelectQuery(std::string, std::string);
-  ~SelectQuery() = default;
- void encryptQuery(std::map<std::string, std::map<std::string, int>>,std::map<std::string, std::map<std::string, byte[16]>>) override;
+  ~SelectQuery(){};
+ //void encryptQuery(std::map<std::string, std::map<std::string, int>>,std::map<std::string, std::map<std::string, byte[16]>>) override;
 };
 
 #endif

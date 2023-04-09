@@ -20,8 +20,8 @@ struct Clause {
 // the query to the relevant query type
 class GenericQuery {
 public:
-  virtual ~GenericQuery() = 0;
-  virtual void encryptQuery(std::map<std::string, std::map<std::string, int>>,std::map<std::string, std::map<std::string, byte[16]>>) = 0;
+  ~GenericQuery() = default;
+  //virtual void encryptQuery(std::map<std::string, std::map<std::string, int>>,std::map<std::string, std::map<std::string, byte[16]>>) = 0;
 };
 
 namespace QueryBuilder {

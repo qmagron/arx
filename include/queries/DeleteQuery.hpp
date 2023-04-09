@@ -15,8 +15,8 @@ private:
 
 public:
   DeleteQuery(std::string, std::string);
-  ~DeleteQuery() = default;
-  void encryptQuery(std::map<std::string, std::map<std::string, int>>,std::map<std::string, std::map<std::string, byte[16]>>) override;
+  ~DeleteQuery(){};
+  //void encryptQuery(std::map<std::string, std::map<std::string, int>>,std::map<std::string, std::map<std::string, byte[16]>>) override;
 };
 
 #endif

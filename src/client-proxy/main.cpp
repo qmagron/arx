@@ -14,7 +14,7 @@ constexpr unsigned int REMOTE_PORT = 1237;
 
 int main() {
   ClientProxy client(IN_PORT, OUT_PORT);  
-  GenericQuery* caca = QueryBuilder::buildQuery("Delete from caca where caca=2;");
+  //GenericQuery* caca = QueryBuilder::buildQuery("Delete from caca where caca=2;");
   //client.start(REMOTE_PORT);
 
   return 0;
