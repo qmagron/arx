@@ -95,5 +95,57 @@ constexpr std::bitset<n1+n2> operator+(const std::bitset<n1>& a, const std::bits
   return c;
 }
 
+/**
+ * @brief Concatenation of two arrays of bitsets.
+ */
+template<size_t n, size_t n1, size_t n2>
+constexpr std::array<std::bitset<n>, n1+n2> operator+(const std::array<std::bitset<n>, n1>& a, const std::array<std::bitset<n>, n2>& b) {
+  std::array<std::bitset<n>, n1+n2> c;
+
+  for (size_t i = 0; i < n1; ++i) {
+    c[i] = a[i];
+  }
+
+  for (size_t i = 0; i < n2; ++i) {
+    c[i+n1] = b[i];
+  }
+
+  return c;
+}
+
+/**
+ * @brief Retrieve the first m bitsets of an array of bitsets.
+ * @param[in] n The size of the array
+ * @param[in] m The number of bitsets to retrieve
+ * @param[in] k The size of the bitsets
+ * @param[out] out The output array
+ * @param[in] in The input array
+ * @return The first m bitsets of the array
+ */
+template<size_t n, size_t m, size_t k>
+constexpr std::array<std::bitset<k>, m>& operator>>=(std::array<std::bitset<k>, m>& out, const std::array<std::bitset<k>, n>& in) {
+  for (size_t i = 0; i < m; ++i) {
+    out[i] = in[i];
+  }
+  return out;
+}
+
+/**
+ * @brief Retrieve the last m bitsets of an array of bitsets.
+ * @param[in] n The size of the array
+ * @param[in] m The number of bitsets to retrieve
+ * @param[in] k The size of the bitsets
+ * @param[out] out The output array
+ * @param[in] in The input array
+ * @return The last m bitsets of the array
+ */
+template<size_t n, size_t m, size_t k>
+constexpr std::array<std::bitset<k>, m>& operator<<=(std::array<std::bitset<k>, m>& out, const std::array<std::bitset<k>, n>& in) {
+  for (size_t i = 0; i < m; ++i) {
+    out[i] = in[n-m+i];
+  }
+  return out;
+}
+
 
 #endif

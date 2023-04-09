@@ -113,6 +113,32 @@ inline GarbledCircuit<n,m,k> garble(const Circuit<n,m>& C) {
 }
 
 /**
+ * @brief Encode a partial input.
+ * @param[in] n The number of input wires
+ * @param[in] k The security parameter
+ * @param[in] start The inclusive start index of the input
+ * @param[in] end The exclusive end index of the input (start < end <= n)
+ * @param[in] x The partial input to encode
+ * @param[in] e The encode information
+ * @param[in] R The free-XOR value
+ * @return The partial garbled input (X) from start to end
+ * @note See https://ia.cr/2014/756
+ */
+template<size_t n, size_t k, size_t start, size_t end>
+std::array<CipherText<k>, end-start> encode(const std::bitset<end-start>& x, const std::array<CipherText<k>, end-start>& e, const CipherText<k>& R) {
+  static_assert(start < end, "start must be smaller than end");
+  static_assert(end <= n, "end must be smaller than n");
+
+  std::array<CipherText<k>, end-start> X;
+
+  for (size_t i = 0; i < end-start; ++i) {
+    X[i] = e[i] ^ x[(end-start)-i-1]*R;
+  }
+
+  return X;
+}
+
+/**
  * @brief Encode an input.
  * @param[in] n The number of input wires
  * @param[in] k The security parameter
@@ -124,13 +150,7 @@ inline GarbledCircuit<n,m,k> garble(const Circuit<n,m>& C) {
  */
 template<size_t n, size_t k>
 std::array<CipherText<k>, n> encode(const std::bitset<n>& x, const std::array<CipherText<k>, n>& e, const CipherText<k>& R) {
-  std::array<CipherText<k>, n> X;
-
-  for (size_t i = 0; i < n; ++i) {
-    X[i] = e[i] ^ x[n-i-1]*R;
-  }
-
-  return X;
+  return encode<n,k,0,n>(x, e, R);
 }
 
 /**
