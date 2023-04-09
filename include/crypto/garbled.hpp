@@ -76,12 +76,27 @@ struct GarbledCircuit: public Circuit<n,m> {
  * @param[in] m The number of output wires
  * @param[in] k The security parameter
  * @param[in] C The circuit to garble
- * @param[out] W An optional table containing all wire labels
+ * @param[out] W An table containing all wire labels
  * @return The garbled Circuit
  * @note See https://ia.cr/2014/756
  */
 template<size_t n, size_t m, size_t k>
-GarbledCircuit<n,m,k> garble(const Circuit<n,m>& C, std::vector<CipherPair<k>>* pW = nullptr);
+GarbledCircuit<n,m,k> garble(const Circuit<n,m>& C, std::vector<CipherPair<k>>& W);
+
+/**
+ * @brief Garble a circuit.
+ * @param[in] n The number of input wires
+ * @param[in] m The number of output wires
+ * @param[in] k The security parameter
+ * @param[in] C The circuit to garble
+ * @return The garbled Circuit
+ * @note See https://ia.cr/2014/756
+ */
+template<size_t n, size_t m, size_t k>
+inline GarbledCircuit<n,m,k> garble(const Circuit<n,m>& C) {
+  std::vector<CipherPair<k>> W;
+  return garble(C, W);
+}
 
 /**
  * @brief Encode an input.
@@ -104,12 +119,29 @@ std::array<CipherText<k>, n> encode(const std::bitset<n>& x, const std::array<Ci
  * @param[in] X The garbled input
  * @param[in] C The garbled circuit
  * @param[in] G The garbled table
- * @param[out] W An optional table containing all wire labels
+ * @param[out] W An table containing all wire labels
  * @return The garbled output (Y)
  * @note See https://ia.cr/2014/756
  */
 template<size_t n, size_t m, size_t k>
-std::array<CipherText<k>, m> evaluate(const std::array<CipherText<k>, n>& X, const Circuit<n,m>& C, const GarbledTable<k>& G, std::vector<CipherText<k>>* pW = nullptr);
+std::array<CipherText<k>, m> evaluate(const std::array<CipherText<k>, n>& X, const Circuit<n,m>& C, const GarbledTable<k>& G, std::vector<CipherText<k>>& W);
+
+/**
+ * @brief Evaluate a garbled circuit.
+ * @param[in] n The number of input wires
+ * @param[in] m The number of output wires
+ * @param[in] k The security parameter
+ * @param[in] X The garbled input
+ * @param[in] C The garbled circuit
+ * @param[in] G The garbled table
+ * @return The garbled output (Y)
+ * @note See https://ia.cr/2014/756
+ */
+template<size_t n, size_t m, size_t k>
+inline std::array<CipherText<k>, m> evaluate(const std::array<CipherText<k>, n>& X, const Circuit<n,m>& C, const GarbledTable<k>& G) {
+  std::vector<CipherText<k>> W;
+  return evaluate(X, C, G, W);
+}
 
 /**
  * @brief Decode a garbled output.

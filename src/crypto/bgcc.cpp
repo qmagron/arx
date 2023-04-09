@@ -1,7 +1,5 @@
 #include "crypto/bgcc.hpp"
 
-#include <iostream>
-
 #include "crypto/utils.hpp"
 #include "crypto/hash.hpp"
 
@@ -15,7 +13,7 @@ BGCC<n,k> generateBGCC(const Circuit<n,1>& C, const std::array<CipherText<k>, n>
   constexpr std::bitset<n> x0, x1(-1);
 
   std::vector<CipherPair<k>> W;
-  BGCC<n,k> bgcc {garble<n,1,k>(C, &W)};
+  BGCC<n,k> bgcc {garble<n,1,k>(C, W)};
 
   auto& K = W[bgcc.out[0]];  // bgcc.out[0] is the only output wire
 
@@ -53,7 +51,7 @@ BGCC<n,k> generateBGCC(const Circuit<n,1>& C, const std::array<CipherText<k>, n>
 template<size_t n, size_t k>
 bool evaluateBGCC(std::array<CipherText<k>, n>& X, const Circuit<n,1>& C, const GarbledTable<k>& G, const CipherText<1>& d, const TransitionTable<n,k>& T) {
   std::vector<CipherText<k>> W;
-  bool y = decode(evaluate(X, C, G, &W), d)[0];
+  bool y = decode(evaluate(X, C, G, W), d)[0];
 
   auto& K = W[C.out[0]];
 
