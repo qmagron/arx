@@ -21,7 +21,7 @@ InsertQuery::InsertQuery(std::string query, std::string table) {
 
   boost::smatch caughtFields;
   boost::smatch caughtValues;
-  boost::regex valuesExpr{"\\((([a-zA-Z]+|\".\")(,([a-zA-Z]+|\".\")+)*)\\)"};
+  boost::regex valuesExpr{"\\((([a-zA-Z]+|\'.\')(,([a-zA-Z]+|\'.\')+)*)\\)"};
   boost::regex fieldsExpr{"\\(([a-zA-Z]+(,[a-zA-Z]+)*)\\)"};
 
   std::string valuesString;

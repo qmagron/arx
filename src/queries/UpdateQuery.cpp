@@ -9,24 +9,51 @@
 
 UpdateQuery::UpdateQuery(std::string query, std::string table) {
   this->table = table;
-  std::vector<std::string> temp;
+  std::vector<std::string> temp = std::vector<std::string>();
 
-  clauses = std::vector<whereClause>();
+  std::string copy;
+
+  whereClauses = std::vector<Clause>();
+  setClauses = std::vector<Clause>();
   boolOperators = std::vector<std::string>();
   boost::regex expr{"(?i)\\s*UPDATE\\s+([a-zA-Z0-9_]+)\\s+SET\\s+([a-zA-Z0-9_]+"
                     "\\s*=\\s*[^,]+)(?:\\s*,\\s*([a-zA-Z0-9_]+\\s*=\\s*[^,]+))*"
                     "\\s*(?:WHERE\\s+([a-zA-Z]+)\\s*(=|<=|>=)\\s*(\"[a-zA-z0-9]"
                     "+\"|[0-9]+))?\\s*;\\s*"};
   boost::regex whereExpr{
-      "([a-zA-Z]+)\\s*(=|<=|>=)\\s*(\"[a-zA-z0-9]+\"|[0-9]+)"};
+      "([a-zA-Z]+)\\s*(=|<=|>=)\\s*(\'[a-zA-z0-9]+\'|[0-9]+)"};
+  boost::regex setExpr{"([a-zA-Z]+)\\s*(=)\\s*(\'[a-zA-z0-9]+\'|[0-9]+)"};
   boost::regex boolExpr{"(?i)(and|or)(?-i)"};
   boost::smatch caughtClauses;
   boost::smatch boolOp;
 
+
+
   if (boost::regex_match(query, expr)) {
     boost::algorithm::split_regex(temp, query,
                                   boost::regex{"(?i)(SET | where)"});
-    // TODO assign vectors to attributes
+
+    copy = temp[2];
+    while (boost::regex_search(temp[1], caughtClauses, setExpr)) {
+
+      boost::split(temp,caughtClauses[0],boost::is_any_of("="));
+      setClauses.push_back(Clause(temp[0], "=", temp[1]));
+      caughtClauses.suffix().str();
+    }
+    
+    
+
+    while (boost::regex_search(temp[2], caughtClauses, whereExpr)) {
+      whereClauses.push_back(
+          Clause(caughtClauses[1], caughtClauses[2], caughtClauses[3]));
+      temp[2] = caughtClauses.suffix().str();
+    }
+
+    while (boost::regex_search(copy, boolOp, boolExpr)) {
+      boolOperators.push_back(boolOp[1]);
+      copy = boolOp.suffix().str();
+    }
+
   } else {
     std::cerr << "Syntax error on Update Query" << std::endl;
     throw std::exception();

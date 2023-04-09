@@ -7,18 +7,30 @@
 #include <boost/algorithm/string.hpp>
 #include <iostream>
 
-GenericQuery QueryBuilder::buildQuery(std::string query) {
+Clause::Clause(std::string column, std::string op, std::string value) {
+  this->column = boost::trim_copy(column);
+  this->op = boost::trim_copy(op);
+  this->value = boost::trim_copy(value);
+}
+std::ostream& operator<<(std::ostream& os, const Clause& cl)
+{
+    os << cl.column << ' ' << cl.op << ' ' << cl.value << std::endl;
+    return os;
+}
+
+GenericQuery* QueryBuilder::buildQuery(std::string query) {
   std::vector<std::string> type;
+  boost::trim(query);
   boost::split(type, query, boost::is_any_of(" "));
 
   if (boost::iequals(type[0], "SELECT")) {
-    return SelectQuery(query,type[2]);
+    return new SelectQuery(query, type[2]);
   } else if (boost::iequals(type[0], "UPDATE")) {
-    return UpdateQuery(query,type[2]);
+    return new UpdateQuery(query, type[2]);
   } else if (boost::iequals(type[0], "DELETE")) {
-    return DeleteQuery(query,type[2]);
+    return new DeleteQuery(query, type[2]);
   } else if (boost::iequals(type[0], "INSERT")) {
-    return InsertQuery(query,type[2]);
+    return new InsertQuery(query, type[2]);
   } else {
     std::cerr << "Query could not be parsed" << std::endl;
     throw std::exception();

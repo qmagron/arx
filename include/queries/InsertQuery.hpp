@@ -13,7 +13,8 @@ private:
   std::vector<std::string> values;
 
 public:
-  InsertQuery(std::string,std::string);
+  InsertQuery(std::string, std::string);
   ~InsertQuery() = default;
+  void encryptQuery(std::map<std::string, std::map<std::string, int>>,std::map<std::string, std::map<std::string, byte[16]>>) override;
 };
 #endif

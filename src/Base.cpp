@@ -1,8 +1,10 @@
-#include "Crypto.hpp"
+#include "Base.hpp"
 
 #include <cryptopp/ccm.h>
 #include <cryptopp/filters.h>
 #include <cryptopp/osrng.h>
+
+#include "queries/GenericQuery.hpp"
 
 using CryptoPP::AutoSeededRandomPool;
 
@@ -12,13 +14,11 @@ using CryptoPP::StreamTransformationFilter;
 using CryptoPP::StringSink;
 using CryptoPP::StringSource;
 
-
 #ifdef __CRYPTOPP_BYTE__
 using byte = CryptoPP::byte;
 #endif
 
-
-std::string Crypto::encryptBASE(std::string message, byte counter[4]) {
+std::string Base::encryptBASE(std::string message, byte counter[4]) {
   std::string cipher;
 
   byte fullIV[16];
@@ -34,7 +34,7 @@ std::string Crypto::encryptBASE(std::string message, byte counter[4]) {
   try {
 
     CTR_Mode<AES>::Encryption e;
-    e.SetKeyWithIV(Crypto::arxKey, sizeof(Crypto::arxKey), fullIV);
+    e.SetKeyWithIV(Base::arxKey, sizeof(Base::arxKey), fullIV);
 
     // The StreamTransformationFilter adds padding
     //  as required. ECB and CBC Mode must be padded
@@ -52,7 +52,7 @@ std::string Crypto::encryptBASE(std::string message, byte counter[4]) {
   return cipher;
 }
 
-std::string Crypto::decryptBASE(std::string cipher, byte counter[4]) {
+std::string Base::decryptBASE(std::string cipher, byte counter[4]) {
   std::string recovered;
 
   byte fullIV[16];
@@ -67,7 +67,7 @@ std::string Crypto::decryptBASE(std::string cipher, byte counter[4]) {
 
   try {
     CTR_Mode<AES>::Decryption d;
-    d.SetKeyWithIV(Crypto::arxKey, sizeof(Crypto::arxKey), fullIV);
+    d.SetKeyWithIV(Base::arxKey, sizeof(Base::arxKey), fullIV);
 
     // The StreamTransformationFilter removes
     //  padding as required.

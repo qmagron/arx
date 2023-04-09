@@ -1,15 +1,14 @@
 #ifndef __personal_crypto__
 #define __personal_crypto__
 
+#include "queries/DeleteQuery.hpp"
+#include "queries/InsertQuery.hpp"
+#include "queries/SelectQuery.hpp"
+#include "queries/UpdateQuery.hpp"
 #include <cryptopp/aes.h>
 #include <cstddef>
 #include <iostream>
 #include <string>
-#include "queries/InsertQuery.hpp"
-#include "queries/SelectQuery.hpp"
-#include "queries/UpdateQuery.hpp"
-#include "queries/DeleteQuery.hpp"
-
 
 using CryptoPP::AES;
 
@@ -17,8 +16,7 @@ using CryptoPP::AES;
 using byte = CryptoPP::byte;
 #endif
 
-
-namespace Crypto {
+namespace Base {
 // 128 bit array key of 59E22E9D3351B9B46627F49DA8BF56D4
 
 inline byte arxKey[AES::DEFAULT_KEYLENGTH] = {
@@ -29,11 +27,6 @@ inline byte iv[16] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 std::string encryptBASE(std::string, byte[4]);
 std::string decryptBASE(std::string, byte[4]);
 
-InsertQuery encryptQuery(InsertQuery,std::map<std::string,std::string>);
-UpdateQuery encryptQuery(UpdateQuery,std::map<std::string,std::string>);
-DeleteQuery encryptQuery(DeleteQuery,std::map<std::string,std::string>);
-SelectQuery encryptQuery(SelectQuery,std::map<std::string,std::string>);
-
-} // namespace Crypto
+} // namespace Base
 
 #endif
