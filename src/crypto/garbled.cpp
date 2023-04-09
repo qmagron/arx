@@ -124,7 +124,7 @@ inline void dFreeXOR(std::vector<CipherText<k>>& W, const Gate2& g) {
 
 template<size_t k>
 inline void eFreeNXOR(std::vector<CipherPair<k>>& W, const Gate2& g) {
-  W[g.out][DOWN] = ~W[g.in[0]][DOWN] ^ W[g.in[1]][DOWN];
+  W[g.out][DOWN] = W[g.in[0]][UP] ^ W[g.in[1]][DOWN];
 }
 
 
