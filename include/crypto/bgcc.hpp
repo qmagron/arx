@@ -82,6 +82,38 @@ BGCC<n,k> generateBGCC(const Circuit<n,1>& C, const std::array<CipherText<k>, n>
  * @brief Evaluate a branching garbled circuit chain.
  * @param[in] n The number of input wires
  * @param[in] k The security parameter
+ * @param[in] start The start index of the output encoding
+ * @param[in] end The end index of the output encoding
+ * @param[in,out] X The garbled input that will be overwritten for the next evaluation
+ * @param[in] C The circuit
+ * @param[in] G The garbled table
+ * @param[in] d The decode information
+ * @param[in] T The transition table
+ * @return The output of the circuit (L/R)
+ */
+template<size_t n, size_t k, size_t start=0, size_t end=GCN/2>
+bool evaluateBGCC(std::array<CipherText<k>, n>& X, const Circuit<n,1>& C, const GarbledTable<k>& G, const CipherText<1>& d, const TransitionTable<end-start,k>& T) {
+  static_assert(start < end, "start must be smaller than end");
+  static_assert(end <= n, "end must be smaller than n");
+
+  std::vector<CipherText<k>> W;
+  bool y = decode(evaluate(X, C, G, W), d)[0];
+
+  auto& K = W[C.out[0]];
+
+  for (size_t i = 0; i < end-start; ++i) {
+    bool s = X[start+i][0];  // Select bit
+    hash(X[start+i], K+X[start+i]);
+    X[start+i] ^= T[y][s][i];
+  }
+
+  return y;
+}
+
+/**
+ * @brief Evaluate a branching garbled circuit chain.
+ * @param[in] n The number of input wires
+ * @param[in] k The security parameter
  * @param[in,out] X The garbled input that will be overwritten for the next evaluation
  * @param[in] C The circuit
  * @param[in] G The garbled table
@@ -91,18 +123,7 @@ BGCC<n,k> generateBGCC(const Circuit<n,1>& C, const std::array<CipherText<k>, n>
  */
 template<size_t n, size_t k>
 bool evaluateBGCC(std::array<CipherText<k>, n>& X, const Circuit<n,1>& C, const GarbledTable<k>& G, const CipherText<1>& d, const TransitionTable<n,k>& T) {
-  std::vector<CipherText<k>> W;
-  bool y = decode(evaluate(X, C, G, W), d)[0];
-
-  auto& K = W[C.out[0]];
-
-  for (size_t i = 0; i < n; ++i) {
-    bool s = X[i][0];  // Select bit
-    hash(X[i], K+X[i]);
-    X[i] ^= T[y][s][i];
-  }
-
-  return y;
+  return evaluateBGCC<n,k,0,n>(X, C, G, d, T);
 }
 
 

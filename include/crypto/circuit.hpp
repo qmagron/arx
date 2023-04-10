@@ -1,7 +1,9 @@
 #ifndef __CIRCUIT_HPP__
 #define __CIRCUIT_HPP__
 
+#include <array>
 #include <cstddef>
+#include <vector>
 
 
 /**
