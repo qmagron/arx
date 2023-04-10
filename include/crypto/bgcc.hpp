@@ -33,12 +33,14 @@ struct BGCC: public GarbledCircuit<n,1,k> {
  * @param[in] k The security parameter
  * @param[in] C The circuit
  * @param[in] e0 The first encode information
+ * @param[in] R0 The first free-XOR value
  * @param[in] e1 The second encode information
+ * @param[in] R1 The second free-XOR value
  * @return The branching garbled circuit chain
  * @note See https://ia.cr/2016/591
  */
 template<size_t n, size_t k>
-BGCC<n,k> generateBGCC(const Circuit<n,1>& C, const std::array<CipherText<k>, n>& e0, const std::array<CipherText<k>, n>& e1) {
+BGCC<n,k> generateBGCC(const Circuit<n,1>& C, const std::array<CipherText<k>, n>& e0, const CipherText<k>& R0, const std::array<CipherText<k>, n>& e1, const CipherText<k>& R1) {
   constexpr std::bitset<n> x0, x1(-1);
 
   std::vector<CipherPair<k>> W;
@@ -54,8 +56,8 @@ BGCC<n,k> generateBGCC(const Circuit<n,1>& C, const std::array<CipherText<k>, n>
 
   // Input labels of children
   std::array<CipherText<k>, n> O[2][2] {
-    { encode(x0,e0,bgcc.R), encode(x1,e0,bgcc.R) },  // L(eft)
-    { encode(x0,e1,bgcc.R), encode(x1,e1,bgcc.R) }   // R(ight)
+    { encode(x0,e0,R0), encode(x1,e0,R0) },  // L(eft)
+    { encode(x0,e1,R1), encode(x1,e1,R1) }   // R(ight)
   };
 
   // Compute transition table
