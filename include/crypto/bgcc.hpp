@@ -26,6 +26,18 @@ struct BGCC: public GarbledCircuit<n,1,k> {
   TransitionTable<n,k> T;
 };
 
+/**
+ * @brief A topology-less branching garbled circuit chain.
+ * @param n The number of input wires
+ * @param k The security parameter
+ * @param T The transition table
+ * @note See https://ia.cr/2016/591
+ */
+template<size_t n, size_t k>
+struct LightBGCC: public LightGarbledCircuit<n,1,k> {
+  TransitionTable<n/2,k> T;
+};
+
 
 /**
  * @brief Generate a branching garbled circuit chain.

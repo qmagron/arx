@@ -41,6 +41,23 @@ struct GarbledCircuit: public Circuit<n,m> {
   CipherText<k> R = {};
 };
 
+/**
+ * @brief A reduced garbled circuit.
+ * @param n The number of input wires
+ * @param m The number of output wires
+ * @param k The security parameter
+ * @param G The garbled table
+ * @param X The garbled input
+ * @param d The decode information
+ * @note See https://ia.cr/2014/756
+ */
+template<size_t n, size_t m, size_t k>
+struct LightGarbledCircuit {
+  GarbledTable<k> G = {};
+  std::array<CipherText<k>, n/2> Xv = {};
+  CipherText<m> d = {};
+};
+
 
 /**
  * @brief Garble a circuit.
