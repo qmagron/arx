@@ -7,8 +7,7 @@
 
 class ServerProxy: public Proxy {
  private:
-  // Indexes
-  ArxRange<uint64_t> arxRange = {};
+  // TOOD indexes
 
  protected:
   Packet forward(const Packet &inPacket) override;
