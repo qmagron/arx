@@ -33,8 +33,8 @@ constexpr std::vector<Gate2> gatesCOMP() {
   std::vector<Gate2> gates;
 
   // Skip c for the first bit
-  gates.push_back(Gate2{ NXOR, X(0), X(0),  2*n });
-  gates.push_back(Gate2{  AND,  2*n, Y(0), Z(0) });
+  gates.push_back(Gate2{ XOR, X(0), Y(0),  2*n });
+  gates.push_back(Gate2{ AND,  2*n, Y(0), Z(0) });
 
   for (size_t i = 1; i < n; ++i) {
     gates.push_back(Gate2{ NXOR, X(i), C(i), A(i) });
