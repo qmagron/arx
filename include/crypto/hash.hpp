@@ -8,7 +8,6 @@
 
 
 #ifdef __CRYPTOPP_BYTE__
-using Keccak_256 = CryptoPP::Keccak_256;
 using byte = CryptoPP::byte;
 #endif
 
@@ -35,7 +34,7 @@ void hash(std::bitset<m>& out, const std::bitset<n>& in) {
   pad(inB, in, nB<n>());
 
   // Perform hash
-  Keccak_256 hash;
+  CryptoPP::Keccak_256 hash;
   hash.Update(inB, nB<n>());
   hash.TruncatedFinal(outB, nB<m>());
 
