@@ -6,13 +6,7 @@
 const auto C = COMP<GCN/2>();
 
 
-ArxRange::Node::~Node() {
-  delete children[0];
-  delete children[1];
-}
-
-
-bool ArxRange::traverse(Node*& node, const std::array<CipherText<GCK>, GCN/2>& Xa, bool i, std::vector<Node*>& path) {
+bool ArxRange::traverse(Node*& node, const std::array<CipherText<GCK>, GCN/2>& Xa, bool i, std::set<Node*>& path) {
   std::array<CipherText<GCK>, GCN> X;
   X >>= Xa;
 
@@ -23,7 +17,7 @@ bool ArxRange::traverse(Node*& node, const std::array<CipherText<GCK>, GCN/2>& X
 
     y = evaluateBGCC<GCN,GCK,0,GCN/2>(X, C, gC->G, gC->d, gC->T);
 
-    path.push_back(node);
+    path.insert(node);
     node = node->children[y];
   }
 
@@ -31,18 +25,115 @@ bool ArxRange::traverse(Node*& node, const std::array<CipherText<GCK>, GCN/2>& X
 }
 
 
-void ArxRange::searchDoc(std::set<Cipher<16>>& out, size_t nidL, size_t nidH, const std::array<CipherText<GCK>, GCN/2>& Xl, const std::array<CipherText<GCK>, GCN/2>& Xh, std::vector<Node*>& N) {
+ArxRange::Node* ArxRange::next(Node* node) const {
+  if (node->children[1]) {
+    node = node->children[1];
+    while (node->children[0]) {
+      node = node->children[0];
+    }
+  } else {
+    while (node->parent && node->parent->children[1] == node) {
+      node = node->parent;
+    }
+    node = node->parent;
+  }
+
+  return node;
+}
+
+
+ArxRange::Node* ArxRange::rotateRight(Node* node, std::set<Node*>& N) {
+  // Update pointers
+  Node* left = node->children[0];
+  node->children[0] = left->children[1];
+  left->children[1] = node;
+
+  // Update heights
+  node->height = std::max(node->children[0] ? node->children[0]->height : 0, node->children[1] ? node->children[1]->height : 0) + 1;
+  left->height = std::max(left->children[0] ? left->children[0]->height : 0, left->children[1] ? left->children[1]->height : 0) + 1;
+
+  // Mark nodes whose children have changed as consumed
+  N.insert(node);
+  N.insert(left);
+
+  return left;
+}
+
+ArxRange::Node* ArxRange::rotateLeft(Node* node, std::set<Node*>& N) {
+  // Update pointers
+  Node* right = node->children[1];
+  node->children[1] = right->children[0];
+  right->children[0] = node;
+
+  // Update heights
+  node->height = std::max(node->children[0] ? node->children[0]->height : 0, node->children[1] ? node->children[1]->height : 0) + 1;
+  right->height = std::max(right->children[0] ? right->children[0]->height : 0, right->children[1] ? right->children[1]->height : 0) + 1;
+
+  // Mark nodes whose children have changed as consumed
+  N.insert(node);
+  N.insert(right);
+
+  return right;
+}
+
+
+ArxRange::Node* ArxRange::rebalance(Node* node, std::set<Node*>& N) {
+  size_t leftHeight = node->children[0] ? node->children[0]->height : 0;
+  size_t rightHeight = node->children[1] ? node->children[1]->height : 0;
+
+  // If unbalanced to right
+  if (rightHeight - leftHeight > 1) {
+    size_t leftHeight = node->children[1]->children[0] ? node->children[1]->children[0]->height : 0;
+    size_t rightHeight = node->children[1]->children[1] ? node->children[1]->children[1]->height : 0;
+
+    // If right child is unbalanced to left
+    if (rightHeight - leftHeight < 0) {
+      node->children[1] = this->rotateRight(node->children[1], N);
+    }
+
+    return this->rotateLeft(node, N);
+  }
+
+  // If unbalanced to left
+  else if (leftHeight - rightHeight > 1) {
+    size_t leftHeight = node->children[0]->children[0] ? node->children[0]->children[0]->height : 0;
+    size_t rightHeight = node->children[0]->children[1] ? node->children[0]->children[1]->height : 0;
+
+    // If left child is unbalanced to right
+    if (rightHeight - leftHeight < 0) {
+      node->children[0] = this->rotateLeft(node->children[0], N);
+    }
+
+    return this->rotateRight(node, N);
+  }
+
+  // If balanced
+  return node;
+}
+
+
+ArxRange::Node* ArxRange::remove(Node* node, std::set<Node*>& N) {
+  Node* newRoot = node->children[0];
+
+  while (node->children[0]) {
+    this->rotateRight(node, N);
+  }
+
+  return newRoot;
+}
+
+
+void ArxRange::searchDoc(std::vector<Node*>& out, size_t nidL, size_t nidH, const std::array<CipherText<GCK>, GCN/2>& Xl, const std::array<CipherText<GCK>, GCN/2>& Xh, std::set<Node*>& N) {
   Node* nodeL = this->nodes[nidL];
   Node* nodeH = this->nodes[nidH];
 
   this->traverse(nodeL, Xl, 0, N);
   this->traverse(nodeH, Xh, 1, N);
 
-  std::vector<Node*> S;
-  // TODO In-order traversal of index from nodeL to nodeH, and collect the intermediate nodes in S
-
-  for (Node* node: S) {
-    out.insert(node->pk);
+  // Get the nodes in (nodeL, nodeH]
+  while (nodeL != nodeH) {
+    nodeL = this->next(nodeL);
+    out.push_back(nodeL);
   }
 }
 
@@ -58,50 +149,57 @@ void ArxRange::repairNode(size_t nid, const LightBGCC<GCN,GCK>* gC[2]) {
 }
 
 
-void ArxRange::insertDoc(size_t docID, const Cipher<16>& eID, const Cipher<16>& eNID, Node* newNode, size_t rootNID, const std::array<CipherText<GCK>, GCN/2>& X, std::vector<Node*>& N) {
+void ArxRange::insertDoc(size_t docID, const Cipher<16>& eID, const Cipher<16>& eNID, Node* newNode, size_t rootNID, const std::array<CipherText<GCK>, GCN/2>& X, std::set<Node*>& N) {
   size_t nid = newNode->nid;
-  this->docToNode.insert_or_assign(docID, eNID);
+  // this->docToNode.insert_or_assign(docID, eNID);
   this->nodes.insert_or_assign(nid, newNode);
 
   Node* node = this->nodes[rootNID];
   bool dir = this->traverse(node, X, 0, N);
-  node->children[dir] = newNode;
 
-  // TODO rebalance the tree
+  // Update pointers
+  node->children[dir] = newNode;
+  newNode->parent = node;
+
+  // Update parent height if necessary
+  if (node->height == 1) {
+    node->height = 2;
+  }
+
+  this->rebalance(node, N);
 }
 
 
-void ArxRange::deleteDoc(size_t nidL, size_t nidH, const std::array<CipherText<GCK>, GCN/2>& Xl, const std::array<CipherText<GCK>, GCN/2>& Xh, std::vector<Node*>& N) {
+void ArxRange::deleteDoc(std::set<Cipher<16>>& out, size_t nidL, size_t nidH, const std::array<CipherText<GCK>, GCN/2>& Xl, const std::array<CipherText<GCK>, GCN/2>& Xh, std::set<Node*>& N) {
   Node* nodeL = this->nodes[nidL];
   Node* nodeH = this->nodes[nidH];
 
   this->traverse(nodeL, Xl, 0, N);
   this->traverse(nodeH, Xh, 1, N);
 
+  // Get the nodes in (nodeL, nodeH]
   std::vector<Node*> S;
-  // TODO In-order traversal of index from nodeL to nodeH, and collect the intermediate nodes in S
-
-  std::set<Cipher<16>> pkSet;
-  for (Node* node: S) {
-    pkSet.insert(node->pk);
-    this->nodes.erase(node->nid);
-    delete node;
-    N.erase(std::find(N.begin(), N.end(), node));
+  while (nodeL != nodeH) {
+    nodeL = this->next(nodeL);
+    S.push_back(nodeL);
   }
 
-  // TODO send pkSet to the client for decryption
-  // TODO remove from docToNode
-  // TODO adjust node pointers
-  // TODO rebalance the tree
-  // TODO update N
+  for (Node* node: S) {
+    out.insert(node->pk);
+    this->nodes.erase(node->nid);
+    this->nodeToDoc.erase(node->nid);
+    this->remove(node, N);
+    N.erase(node);
+    delete node;
+  }
 }
 
 
-void ArxRange::deleteID(size_t docID, std::vector<Node*>& N) {
-  // TODO send this->docToNode[docID] to the client for decryption
-  // TODO remove from docToNode
-  // TODO remove from index
-  // TODO Adjust node pointers
-  // TODO rebalance the tree
-  // TODO update N
-}
+// void ArxRange::deleteID(EDoc docID, std::set<Node*>& N) {
+//   // TODO send this->docToNode[docID] to the client for decryption
+//   // TODO remove from docToNode
+//   // TODO remove from index
+//   // TODO Adjust node pointers
+//   // TODO rebalance the tree
+//   // TODO update N
+// }
