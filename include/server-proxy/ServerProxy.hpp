@@ -22,6 +22,20 @@ class ServerProxy: public Proxy {
    */
   void rangeDelete(size_t idx, size_t rootL, size_t rootH, const std::array<CipherText<GCK>, GCN/2>& Xl, const std::array<CipherText<GCK>, GCN/2>& Xh);
 
+  /**
+   * @brief Delete a document from an index.
+   * @param[in] idx The index identifier
+   * @param[in] pk The document identifier
+   */
+  void rangeDeleteID(size_t idx, const EDoc& pk);
+
+  /**
+   * Repair nodes of an index.
+   * @param[in] index The index
+   * @param[in] N The nodes to repair
+   */
+  void repairNodes(ArxRange& index, const std::set<ArxRange::Node*>& N);
+
  protected:
   Packet forward(const Packet& inPacket) override;
 

@@ -12,10 +12,16 @@ struct Packet {
 
   Packet() = default;
 
-  inline Packet(const std::string &str) {
+  inline Packet(const std::string& str) {
     this->size = str.size();
     this->data = malloc(this->size);
     memcpy(this->data, str.c_str(), this->size);
+  }
+
+  inline Packet(size_t integer) {
+    this->size = sizeof(size_t);
+    this->data = malloc(this->size);
+    memcpy(this->data, &integer, this->size);
   }
 
   inline ~Packet() {

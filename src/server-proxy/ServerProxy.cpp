@@ -31,12 +31,36 @@ void ServerProxy::rangeDelete(size_t idx, size_t rootL, size_t rootH, const std:
   // TODO receive pk from the client-proxy
   // TODO delete pk from the database
 
-  // std::set<EDoc> docs;
-  // for (auto& pk: docs) {
-  //   index.deleteID(pk, consumedNodes);
-  // }
+  std::set<EDoc> docs;
+  for (auto& pk: docs) {
+    index.deleteID(pk, consumedNodes);
+  }
 
-  // TODO send the consumed nodes to the client-proxy
-  // TODO receive repaired nodes from the client-proxy
-  // TODO repair nodes
+  this->repairNodes(index, consumedNodes);
+}
+
+void ServerProxy::rangeDeleteID(size_t idx, const EDoc& pk) {
+  ArxRange& index = this->rangeIndexes[idx];
+
+  std::set<ArxRange::Node*> consumedNodes;
+  Cipher<16> eNid = index.deleteID(pk, consumedNodes);
+
+  // TODO send encrypted nid to the client-proxy
+  // TODO receive nid from the client-proxy
+
+  size_t nid;
+  index.deleteNode(nid, consumedNodes);
+
+  this->repairNodes(index, consumedNodes);
+}
+
+void ServerProxy::repairNodes(ArxRange& index, const std::set<ArxRange::Node*>& N) {
+  Packet headerPacket(N.size());
+  this->send(headerPacket);
+
+  for (ArxRange::Node* node: N) {
+    // TODO send node to the client-proxy
+    // TODO receive repaired node from the client-proxy
+    // TODO repair node
+  }
 }

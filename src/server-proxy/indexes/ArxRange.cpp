@@ -151,7 +151,7 @@ void ArxRange::repairNode(size_t nid, const LightBGCC<GCN,GCK>* gC[2]) {
 
 void ArxRange::insertDoc(size_t docID, const Cipher<16>& eID, const Cipher<16>& eNID, Node* newNode, size_t rootNID, const std::array<CipherText<GCK>, GCN/2>& X, std::set<Node*>& N) {
   size_t nid = newNode->nid;
-  // this->docToNode.insert_or_assign(docID, eNID);
+  this->docToNode.insert_or_assign(docID, eNID);
   this->nodes.insert_or_assign(nid, newNode);
 
   Node* node = this->nodes[rootNID];
@@ -195,11 +195,19 @@ void ArxRange::deleteDoc(std::set<Cipher<16>>& out, size_t nidL, size_t nidH, co
 }
 
 
-// void ArxRange::deleteID(EDoc docID, std::set<Node*>& N) {
-//   // TODO send this->docToNode[docID] to the client for decryption
-//   // TODO remove from docToNode
-//   // TODO remove from index
-//   // TODO Adjust node pointers
-//   // TODO rebalance the tree
-//   // TODO update N
-// }
+Cipher<16> ArxRange::deleteID(EDoc docID, std::set<Node*>& N) {
+  auto it = this->docToNode.find(docID);
+  Cipher<16> eNID = it->second;
+  this->docToNode.erase(it);
+  return eNID;
+}
+
+
+void ArxRange::deleteNode(size_t nid, std::set<Node*>& N) {
+  Node* node = this->nodes[nid];
+  this->nodes.erase(nid);
+  this->nodeToDoc.erase(nid);
+  this->remove(node, N);
+  N.erase(node);
+  delete node;
+}

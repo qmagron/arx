@@ -38,7 +38,7 @@ class ArxRange {
  private:
   std::map<size_t, Node*> nodes;
   std::map<size_t, const EDoc> nodeToDoc;
-  // std::map<size_t, Cipher<16>> docToNode;
+  std::map<size_t, Cipher<16>> docToNode;
 
   /**
    * @brief Traverse a node of the index.
@@ -138,8 +138,16 @@ class ArxRange {
    * @brief Delete a document from the index.
    * @param[in] docID The document ID
    * @param[in,out] N Nodes to repair
+   * @return The encrypted node ID
    */
-  void deleteID(EDoc docID, std::set<Node*>& N);
+  Cipher<16> deleteID(EDoc docID, std::set<Node*>& N);
+
+  /**
+   * @brief Delete a node from the index.
+   * @param[in] nid The node ID
+   * @param[in,out] N Nodes to repair
+   */
+  void deleteNode(size_t nid, std::set<Node*>& N);
 };
 
 
