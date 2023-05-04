@@ -52,11 +52,25 @@ struct LightBGCC: public LightGarbledCircuit<n,1,k> {
  * @note See https://ia.cr/2016/591
  */
 template<size_t n, size_t k>
-BGCC<n,k> generateBGCC(const Circuit<n,1>& C, const std::array<CipherText<k>, n>& e0, const CipherText<k>& R0, const std::array<CipherText<k>, n>& e1, const CipherText<k>& R1) {
+BGCC<n,k> generateBGCC(size_t nid, const Circuit<n,1>& C, size_t nidL, size_t nidR) {
   constexpr std::bitset<n> x0, x1(-1);
 
+  // Recompute R0 and e0
+  const CipherText<k> R0 = toR<k>(nidL);
+  const std::array<CipherText<k>, n>& e0;
+  for (const Wire& w: C.wires) {
+    e0[w] = toE<k>(nidL, w);
+  }
+
+  // Recompute R1 and e1
+  const CipherText<k> R1 = toR<k>(nidR);
+  const std::array<CipherText<k>, n>& e1;
+  for (const Wire& w: C.wires) {
+    e1[w] = toE<k>(nidR, w);
+  }
+
   std::vector<CipherPair<k>> W;
-  BGCC<n,k> bgcc {garble<n,1,k>(C, W)};
+  BGCC<n,k> bgcc {garble<n,1,k>(nid, C, W)};
 
   auto& K = W[bgcc.out[0]];  // bgcc.out[0] is the only output wire
 

@@ -36,9 +36,7 @@ using GarbledTable = std::vector<CipherPair<k>>;
 template<size_t n, size_t m, size_t k>
 struct GarbledCircuit: public Circuit<n,m> {
   GarbledTable<k> G = {};
-  std::array<CipherText<k>, n> e = {};
   CipherText<m> d = {};
-  CipherText<k> R = {};
 };
 
 /**
@@ -59,6 +57,26 @@ struct LightGarbledCircuit {
 };
 
 
+template<size_t k>
+CipherText<k> toR(size_t nid) {
+  CipherText<sizeof(size_t)> cNid(nid);
+  CipherText<k> R;
+  hash<k>(R, cNid);
+  R[0] = 1;
+  return R;
+}
+
+
+template<size_t k>
+CipherText<k> toE(size_t nid, const Wire& w) {
+  CipherText<sizeof(size_t)> cNid(nid);
+  CipherText<sizeof(Wire)> cWire(w);
+  CipherText<k> e;
+  hash<k>(e, cNid+cWire);
+  return e;
+}
+
+
 /**
  * @brief Garble a circuit.
  * @param[in] n The number of input wires
@@ -70,23 +88,19 @@ struct LightGarbledCircuit {
  * @note See https://ia.cr/2014/756
  */
 template<size_t n, size_t m, size_t k>
-GarbledCircuit<n,m,k> garble(const Circuit<n,m>& C, std::vector<CipherPair<k>>& W) {
+GarbledCircuit<n,m,k> garble(size_t nid, const Circuit<n,m>& C, std::vector<CipherPair<k>>& W) {
   GarbledCircuit<n,m,k> gC {C};
 
   auto& G = gC.G;
-  auto& e = gC.e;
   auto& d = gC.d;
-  auto& R = gC.R;
   W.resize(C.nWires);
 
-  R = random_bitset<k>();
-  R[0] = 1;
+  CipherText<k> R = toR<k>(nid);
 
   // Generate input labels
-  for (const Wire& i: C.in) {
-    W[i][DOWN] = random_bitset<k>();
-    W[i][UP] = W[i][DOWN] ^ R;
-    e[i] = W[i][DOWN];
+  for (const Wire& w: C.in) {
+    W[w][DOWN] = toE<k>(nid, w);
+    W[w][UP] = W[w][DOWN] ^ R;
   }
 
   // Generate other labels
