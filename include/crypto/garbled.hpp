@@ -35,8 +35,10 @@ using GarbledTable = std::vector<CipherPair<k>>;
  */
 template<size_t n, size_t m, size_t k>
 struct GarbledCircuit: public Circuit<n,m> {
-  GarbledTable<k> G = {};
-  CipherText<m> d = {};
+  GarbledTable<k> G;
+  std::array<CipherText<k>, n> e;
+  CipherText<m> d;
+  CipherText<k> R;
 };
 
 /**
@@ -45,34 +47,33 @@ struct GarbledCircuit: public Circuit<n,m> {
  * @param m The number of output wires
  * @param k The security parameter
  * @param G The garbled table
- * @param X The garbled input
  * @param d The decode information
  * @note See https://ia.cr/2014/756
  */
 template<size_t n, size_t m, size_t k>
-struct LightGarbledCircuit {
-  GarbledTable<k> G = {};
-  std::array<CipherText<k>, n/2> Xv = {};
-  CipherText<m> d = {};
+struct LightGarbledCircuit: public Circuit<n,m> {
+  GarbledTable<k> G;
+  CipherText<m> d;
 };
 
 
 template<size_t k>
-CipherText<k> toR(size_t nid) {
+CipherText<k> toR(size_t nid, size_t nonce) {
   CipherText<sizeof(size_t)> cNid(nid);
+  CipherText<sizeof(size_t)> cNonce(nonce);
   CipherText<k> R;
-  hash<k>(R, cNid);
+  hash(R, cNid+cNonce);
   R[0] = 1;
   return R;
 }
 
-
 template<size_t k>
-CipherText<k> toE(size_t nid, const Wire& w) {
+CipherText<k> toE(size_t nid, size_t nonce, const Wire& w) {
   CipherText<sizeof(size_t)> cNid(nid);
+  CipherText<sizeof(size_t)> cNonce(nonce);
   CipherText<sizeof(Wire)> cWire(w);
   CipherText<k> e;
-  hash<k>(e, cNid+cWire);
+  hash(e, cNid+cNonce+cWire);
   return e;
 }
 
@@ -83,24 +84,29 @@ CipherText<k> toE(size_t nid, const Wire& w) {
  * @param[in] m The number of output wires
  * @param[in] k The security parameter
  * @param[in] C The circuit to garble
+ * @param[in] nid The unique id of the garbled circuit
+ * @param[in] nonce A unique nonce used for hashing
  * @param[out] W An table containing all wire labels
  * @return The garbled Circuit
  * @note See https://ia.cr/2014/756
  */
 template<size_t n, size_t m, size_t k>
-GarbledCircuit<n,m,k> garble(size_t nid, const Circuit<n,m>& C, std::vector<CipherPair<k>>& W) {
+GarbledCircuit<n,m,k> garble(const Circuit<n,m>& C, size_t nid, size_t nonce, std::vector<CipherPair<k>>& W) {
   GarbledCircuit<n,m,k> gC {C};
 
   auto& G = gC.G;
+  auto& e = gC.e;
   auto& d = gC.d;
+  auto& R = gC.R;
   W.resize(C.nWires);
 
-  CipherText<k> R = toR<k>(nid);
+  R = toR<k>(nid, nonce);
 
   // Generate input labels
   for (const Wire& w: C.in) {
-    W[w][DOWN] = toE<k>(nid, w);
+    W[w][DOWN] = toE<k>(nid, nonce, w);
     W[w][UP] = W[w][DOWN] ^ R;
+    e[w] = W[w][DOWN];
   }
 
   // Generate other labels
@@ -134,13 +140,15 @@ GarbledCircuit<n,m,k> garble(size_t nid, const Circuit<n,m>& C, std::vector<Ciph
  * @param[in] m The number of output wires
  * @param[in] k The security parameter
  * @param[in] C The circuit to garble
+ * @param[in] nid The unique id of the garbled circuit
+ * @param[in] nonce A unique nonce used for hashing
  * @return The garbled Circuit
  * @note See https://ia.cr/2014/756
  */
 template<size_t n, size_t m, size_t k>
-inline GarbledCircuit<n,m,k> garble(const Circuit<n,m>& C) {
+inline GarbledCircuit<n,m,k> garble(const Circuit<n,m>& C, size_t nid, size_t nonce) {
   std::vector<CipherPair<k>> W;
-  return garble(C, W);
+  return garble(C, nid, nonce, W);
 }
 
 /**
@@ -153,12 +161,12 @@ inline GarbledCircuit<n,m,k> garble(const Circuit<n,m>& C) {
  * @return The garbled input (X) from start to end
  * @note See https://ia.cr/2014/756
  */
-template<size_t n, size_t k>
-std::array<CipherText<k>, n> encode(const std::bitset<n>& x, const std::array<CipherText<k>, n>& e, const CipherText<k>& R) {
-  std::array<CipherText<k>, n> X;
+template<size_t n, size_t k, size_t start=0, size_t end=n>
+std::array<CipherText<k>, end-start> encode(const std::bitset<end-start>& x, const std::array<CipherText<k>, n>& e, const CipherText<k>& R) {
+  std::array<CipherText<k>, end-start> X;
 
-  for (size_t i = 0; i < n; ++i) {
-    X[i] = e[i] ^ x[n-i-1]*R;
+  for (size_t i = 0; i < end-start; ++i) {
+    X[i] = e[start+i] ^ x[n-i-1]*R;
   }
 
   return X;
