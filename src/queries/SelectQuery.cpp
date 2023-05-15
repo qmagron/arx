@@ -3,6 +3,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 #include <iostream>
+#include "Base.hpp"
 
 // parse the query and store its elements in the class with the constructor
 SelectQuery::SelectQuery(std::string query, std::string table) {
@@ -40,4 +41,14 @@ SelectQuery::SelectQuery(std::string query, std::string table) {
     std::cerr << "Syntax error on Select Query" << std::endl;
     throw std::exception();
   }
+}
+
+
+
+void SelectQuery::encryptQuery(
+    std::map<std::string, std::map<std::string, int>> counters,
+    std::map<std::string, std::map<std::string, byte[16]>> field_keys
+    ,byte fieldEncryptionKey[16]) {
+  byte counter[4] = {0, 0, 0, 0};
+  table = Base::encryptBASE(table, counter,fieldEncryptionKey);
 }

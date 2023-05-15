@@ -29,7 +29,7 @@ using byte = CryptoPP::byte;
   * @note The counter is 4 bytes long allowing for 4,294,967,295 different counter values
 */
 
-std::string Base::encryptBASE(std::string message, byte counter[4]) {
+std::string Base::encryptBASE(std::string message, byte counter[4],byte key[16]) {
 
 
   message.resize(64);
@@ -49,7 +49,7 @@ std::string Base::encryptBASE(std::string message, byte counter[4]) {
   try {
 
     CBC_Mode<AES>::Encryption e;
-    e.SetKeyWithIV(Base::arxKey, sizeof(Base::arxKey), fullIV);
+    e.SetKeyWithIV(key, 16, fullIV);
 
     
     StringSource(message, true,
@@ -74,7 +74,7 @@ std::string Base::encryptBASE(std::string message, byte counter[4]) {
   return encoded;
 }
 
-std::string Base::decryptBASE(std::string cipher, byte counter[4]) {
+std::string Base::decryptBASE(std::string cipher, byte counter[4],byte key[16]) {
   std::string recovered;
   std::string encoded;
 
@@ -91,7 +91,7 @@ std::string Base::decryptBASE(std::string cipher, byte counter[4]) {
 
   try {
     CBC_Mode<AES>::Decryption d;
-    d.SetKeyWithIV(Base::arxKey, sizeof(Base::arxKey), fullIV);
+    d.SetKeyWithIV(key, 16, fullIV);
 
     
     // decode the ciphertext into usable data

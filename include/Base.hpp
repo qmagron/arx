@@ -24,8 +24,10 @@ inline byte arxKey[AES::DEFAULT_KEYLENGTH] = {
     0x66, 0x27, 0xF4, 0x9D, 0xA8, 0xBF, 0x56, 0xD4};
 inline byte iv[16] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                       0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-std::string encryptBASE(std::string, byte[4]);
-std::string decryptBASE(std::string, byte[4]);
+std::string encryptBASE(std::string, byte[4],byte[16]);
+std::string decryptBASE(std::string, byte[4],byte[16]);
+
+
 
 } // namespace Base
 

@@ -5,6 +5,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <cryptopp/aes.h>
 
 class UpdateQuery : public GenericQuery {
 
@@ -16,10 +17,13 @@ private:
   std::vector<std::string> boolOperators;
   std::string table;
 
+  bool checkOperatorsValidity() const;
+
 public:
   UpdateQuery(std::string, std::string);
   ~UpdateQuery(){};
-  //void encryptQuery(std::map<std::string, std::map<std::string, int>>,std::map<std::string, std::map<std::string, byte[16]>>) override;
+  void encryptQuery(std::map<std::string, std::map<std::string, int>>,std::map<std::string, std::map<std::string, byte[16]>>,
+                   byte[16]) override;
 };
 
 #endif

@@ -4,6 +4,7 @@
 #include "GenericQuery.hpp"
 #include <string>
 #include <vector>
+#include <cryptopp/aes.h>
 
 // class that heriates from GenericQuery
 class InsertQuery : public GenericQuery {
@@ -12,9 +13,12 @@ private:
   std::vector<std::string> fields;
   std::vector<std::string> values;
 
+  
+
 public:
   InsertQuery(std::string, std::string);
   ~InsertQuery(){};
-  //void encryptQuery(std::map<std::string, std::map<std::string, int>>,std::map<std::string, std::map<std::string, byte[16]>>) override;
+  void encryptQuery(std::map<std::string, std::map<std::string, int>>,std::map<std::string, std::map<std::string, byte[16]>>,
+                   byte[16]) override;
 };
 #endif

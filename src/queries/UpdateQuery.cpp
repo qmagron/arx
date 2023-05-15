@@ -6,6 +6,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/regex.hpp>
 #include <boost/regex.hpp>
+#include "Base.hpp"
 
 UpdateQuery::UpdateQuery(std::string query, std::string table) {
   this->table = table;
@@ -58,4 +59,14 @@ UpdateQuery::UpdateQuery(std::string query, std::string table) {
     std::cerr << "Syntax error on Update Query" << std::endl;
     throw std::exception();
   }
+}
+
+
+
+void UpdateQuery::encryptQuery(
+    std::map<std::string, std::map<std::string, int>> counters,
+    std::map<std::string, std::map<std::string, byte[16]>> field_keys
+    ,byte fieldEncryptionKey[16]) {
+  byte counter[4] = {0, 0, 0, 0};
+  table = Base::encryptBASE(table, counter,fieldEncryptionKey);
 }

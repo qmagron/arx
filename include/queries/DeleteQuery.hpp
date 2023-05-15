@@ -4,6 +4,7 @@
 #include "GenericQuery.hpp"
 #include <vector>
 #include "Base.hpp"
+#include <cryptopp/aes.h>
 
 // data type to store relevant informations regarding a delete query. Does not
 // allow for emebedded queries (may change in the future)
@@ -12,11 +13,13 @@ private:
   std::string table;
   std::vector<Clause> clauses;
   std::vector<std::string> boolOperators;
+  bool checkOperatorsValidity() const;
 
 public:
   DeleteQuery(std::string, std::string);
   ~DeleteQuery(){};
-  //void encryptQuery(std::map<std::string, std::map<std::string, int>>,std::map<std::string, std::map<std::string, byte[16]>>) override;
+  void encryptQuery(std::map<std::string, std::map<std::string, int>>,std::map<std::string, std::map<std::string, byte[16]>>,
+                   byte[16]) override; 
 };
 
 #endif

@@ -4,6 +4,8 @@
 #include "GenericQuery.hpp"
 #include <string>
 #include <vector>
+#include <cryptopp/aes.h>
+
 
 class SelectQuery : public GenericQuery {
 private:
@@ -11,10 +13,12 @@ private:
   std::vector<Clause> clauses;
   std::vector<std::string> boolOperators;
 
+  bool checkOperatorsValidity() const;
 public:
   SelectQuery(std::string, std::string);
   ~SelectQuery(){};
- //void encryptQuery(std::map<std::string, std::map<std::string, int>>,std::map<std::string, std::map<std::string, byte[16]>>) override;
+ void encryptQuery(std::map<std::string, std::map<std::string, int>>,std::map<std::string, std::map<std::string, byte[16]>>,
+                   byte[16]) override;
 };
 
 #endif

@@ -3,6 +3,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/regex.hpp>
 #include <iostream>
+#include "Base.hpp"
 
 InsertQuery::InsertQuery(std::string query, std::string table) {
   this->table = table;
@@ -58,4 +59,14 @@ InsertQuery::InsertQuery(std::string query, std::string table) {
   }
   
 
+}
+
+
+
+void InsertQuery::encryptQuery(
+    std::map<std::string, std::map<std::string, int>> counters,
+    std::map<std::string, std::map<std::string, byte[16]>> field_keys
+    ,byte fieldEncryptionKey[16]) {
+  byte counter[4] = {0, 0, 0, 0};
+  table = Base::encryptBASE(table, counter,fieldEncryptionKey);
 }
