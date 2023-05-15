@@ -20,6 +20,34 @@ using CryptoPP::StringSource;
 using byte = CryptoPP::byte;
 #endif
 
+
+/**
+ * @brief Encrypt an integer.
+ * @param[in] plein The plaintext
+ * @param[in] nonce A unique nonce
+ * @param[in] key The key
+ * @return The encrypted integer
+ */
+Cipher<16> Base::encryptInt(size_t plain, size_t nonce, byte key[16]) {
+  byte eCounter[4];
+  CryptoPP::Integer(nonce).Encode(eCounter, 4);
+  return Base::encryptBASE(std::to_string(plain), eCounter, key);
+}
+
+/**
+ * @brief Decrypt an integer.
+ * @param[in] cipher The ciphertext
+ * @param[in] nonce A unique nonce
+ * @param[in] key The key
+ * @return The decrypted integer
+ */
+size_t Base::decryptInt(Cipher<16> cipher, size_t nonce, byte key[16]) {
+  byte eCounter[4];
+  CryptoPP::Integer(nonce).Encode(eCounter, 4);
+  return std::stoul(Base::decryptBASE(cipher, eCounter, key));
+}
+
+
 /*
   * @brief Encrypt a string using AES
   * @param[in] plain The data to encrypt read as a string

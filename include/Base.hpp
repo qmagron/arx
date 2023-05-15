@@ -27,6 +27,9 @@ namespace Base {
 
     Cipher<16> encryptBASE(std::string, byte[4], byte[16]);
     std::string decryptBASE(Cipher<16>, byte[4], byte[16]);
+
+    Cipher<16> encryptInt(size_t, size_t, byte[16]);
+    size_t decryptInt(Cipher<16>, size_t, byte[16]);
 }
 
 #endif
