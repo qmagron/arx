@@ -6,6 +6,12 @@
 #include <map>
 #include <string>
 
+
+#ifdef __CRYPTOPP_BYTE__
+using byte = CryptoPP::byte;
+#endif
+
+
 // struct that contains the data about a clause of a query
 struct Clause {
   public:

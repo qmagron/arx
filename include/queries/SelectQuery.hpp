@@ -7,6 +7,11 @@
 #include <cryptopp/aes.h>
 
 
+#ifdef __CRYPTOPP_BYTE__
+using byte = CryptoPP::byte;
+#endif
+
+
 class SelectQuery : public GenericQuery {
 private:
   std::string table;

@@ -6,6 +6,12 @@
 #include <vector>
 #include <cryptopp/aes.h>
 
+
+#ifdef __CRYPTOPP_BYTE__
+using byte = CryptoPP::byte;
+#endif
+
+
 // class that heriates from GenericQuery
 class InsertQuery : public GenericQuery {
 private:
@@ -13,7 +19,7 @@ private:
   std::vector<std::string> fields;
   std::vector<std::string> values;
 
-  
+
 
 public:
   InsertQuery(std::string, std::string);

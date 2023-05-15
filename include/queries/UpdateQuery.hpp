@@ -7,6 +7,12 @@
 #include <vector>
 #include <cryptopp/aes.h>
 
+
+#ifdef __CRYPTOPP_BYTE__
+using byte = CryptoPP::byte;
+#endif
+
+
 class UpdateQuery : public GenericQuery {
 
 private:
