@@ -22,20 +22,15 @@ using byte = CryptoPP::byte;
 
 /*
   * @brief Encrypt a string using AES
-  * @param[in] message The data to encrypt read as a string
+  * @param[in] plain The data to encrypt read as a string
   * @param[in] counter The counter to use for the encryption
   * @return The encrypted string
   * @note The string is padded to 64 bytes
   * @note The counter is 4 bytes long allowing for 4,294,967,295 different counter values
 */
-
-std::string Base::encryptBASE(std::string message, byte counter[4],byte key[16]) {
-
-
-  message.resize(64);
-  std::string cipher;
-  std::string encoded;
-
+Cipher<16> Base::encryptBASE(std::string plain, byte counter[4], byte key[16]) {
+  // TODO support longer size
+  Cipher<16> cipher = {0};
   byte fullIV[16];
 
   // merge counter and iv into fullIV
@@ -48,37 +43,22 @@ std::string Base::encryptBASE(std::string message, byte counter[4],byte key[16])
 
   try {
 
-    CBC_Mode<AES>::Encryption e;
-    e.SetKeyWithIV(key, 16, fullIV);
+    CBC_Mode<AES>::Encryption enc;
+    enc.SetKeyWithIV(key, 16, fullIV, 16);
 
-    
-    StringSource(message, true,
-                 new StreamTransformationFilter(
-                     e,
-                     new StringSink(cipher)) 
-    );                             
+    CryptoPP::ArraySink cs(cipher.data(), cipher.size());
+    CryptoPP::StringSource(plain, true, new CryptoPP::StreamTransformationFilter(enc, new CryptoPP::Redirector(cs)));
 
-    // encode the encrypted string into a readable hex string        
-    encoded.clear();
-    StringSource(cipher, true,
-		new CryptoPP::HexEncoder(
-			new StringSink(encoded)
-		) // HexEncoder
-	);
-  
-  } catch (const CryptoPP::Exception &e) {
+  } catch (const CryptoPP::Exception& e) {
     std::cerr << e.what() << std::endl;
     exit(1);
   }
 
-  return encoded;
+  return cipher;
 }
 
-std::string Base::decryptBASE(std::string cipher, byte counter[4],byte key[16]) {
+std::string Base::decryptBASE(Cipher<16> cipher, byte counter[4], byte key[16]) {
   std::string recovered;
-  std::string encoded;
-
-
   byte fullIV[16];
 
   // merge counter and iv into fullIV
@@ -90,19 +70,12 @@ std::string Base::decryptBASE(std::string cipher, byte counter[4],byte key[16]) 
   }
 
   try {
-    CBC_Mode<AES>::Decryption d;
-    d.SetKeyWithIV(key, 16, fullIV);
 
-    
-    // decode the ciphertext into usable data
-    StringSource(cipher, true,new CryptoPP::HexDecoder(new StringSink(encoded)));
-    // decrypt the data
-    recovered.clear();
-    StringSource s(encoded, true,
-                   new StreamTransformationFilter(
-                       d,
-                       new StringSink(recovered))
-    );                                           
+    CBC_Mode<AES>::Decryption dec;
+    dec.SetKeyWithIV(key, 16, fullIV, 16);
+
+    StringSink cs(recovered);
+    CryptoPP::ArraySource(cipher.data(), cipher.size(), true, new StreamTransformationFilter(dec, new CryptoPP::Redirector(cs)));
 
   } catch (const CryptoPP::Exception &e) {
     std::cerr << e.what() << std::endl;
