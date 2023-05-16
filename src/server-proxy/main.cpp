@@ -1,9 +1,10 @@
 #include <array>
-#include <random>
+#include <iostream>
 
 #include "server-proxy/indexes/ArxRange.hpp"
 #include "Base.hpp"
 #include "crypto/circuits.hpp"
+#include "crypto/utils.hpp"
 
 
 const auto C = COMP<GCN/2>();
@@ -16,12 +17,7 @@ inline byte rangeKey[AES::DEFAULT_KEYLENGTH] = {
 
 
 /* The database contains documents with random values v that will be indexed. */
-std::array<size_t, 12> database = {{
-  static_cast<size_t>(rand()), static_cast<size_t>(rand()), static_cast<size_t>(rand()),
-  static_cast<size_t>(rand()), static_cast<size_t>(rand()), static_cast<size_t>(rand()),
-  static_cast<size_t>(rand()), static_cast<size_t>(rand()), static_cast<size_t>(rand()),
-  static_cast<size_t>(rand()), static_cast<size_t>(rand()), static_cast<size_t>(rand()),
-}};
+std::array<size_t, 12> database = random_array<size_t, 12>();
 
 
 /* The root node is stored on the client side to encode the query */
@@ -36,7 +32,7 @@ std::map<size_t, size_t> garbledCounter;
 
 /**
  * @brief Repair a set of nodes in an ArxRange index.
- * @param[in] index The index
+ * @param[in] index The range index
  * @param[in] nodes The set of nodes to repair
  * @note This function only uses data from the given node.
  */
@@ -88,7 +84,7 @@ ArxRange buildRangeIndex() {
     BGCC<GCN,GCK> gC2 = generateBGCC<GCN,GCK>(C, nid, garbledCounter[nid]++);
 
     // Note that counters must be different for each index and each node.
-    // Since there is only one index, counters are only different for each node.
+    // Since there is only one range index, counters are only different for each node.
     // Moreover, since there is only one node per pk, counters are only different for each pk.
     ArxRange::Node* node = new ArxRange::Node {
       .nid = nid,
@@ -98,7 +94,7 @@ ArxRange buildRangeIndex() {
     };
 
     // For the demonstration, the document is inserted by traversing the index.
-    // In a real use case, the index is built without traversing to prevent
+    // In a real use case, the initial index is built without traversing to prevent
     // garbled circuits from being consumed so there is no need to repair them.
     std::set<ArxRange::Node*> consumedNodes;
 

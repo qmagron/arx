@@ -1,6 +1,7 @@
 #ifndef __UTILS_HPP__
 #define __UTILS_HPP__
 
+#include <array>
 #include <bitset>
 #include <cstddef>
 #include <cryptopp/cryptlib.h>
@@ -29,6 +30,23 @@ constexpr std::bitset<k> random_bitset() {
   }
 
   return b;
+}
+
+/**
+ * @brief Generate a random array of numeric type.
+ */
+template<class T, size_t n>
+constexpr std::array<T, n> random_array() {
+  std::random_device device;
+  std::mt19937 generator(device());
+  std::uniform_int_distribution<T> d(0, std::numeric_limits<T>::max());
+
+  std::array<T, n> arr;
+  for (size_t i = 0; i != n; ++i) {
+    arr[i] = d(generator);
+  }
+
+  return arr;
 }
 
 /**
