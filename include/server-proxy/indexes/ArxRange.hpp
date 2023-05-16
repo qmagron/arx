@@ -25,8 +25,8 @@ class ArxRange {
   struct Node {
     const size_t nid;
     const LightBGCC<GCN,GCK>* gC[2];
-    const Cipher<16> v;
     const Cipher<16> pk;
+    const Cipher<16> v;
 
     Node* children[2] = { nullptr, nullptr };
     Node* parent = nullptr;
@@ -37,7 +37,7 @@ class ArxRange {
 
  private:
   std::map<size_t, Node*> nodes;
-  std::map<size_t, const EDoc> nodeToDoc;
+  std::map<size_t, Cipher<16>> nodeToDoc;
   std::map<size_t, Cipher<16>> docToNode;
 
   /**
@@ -91,7 +91,7 @@ class ArxRange {
 
  public:
   inline ArxRange() = default;
-  inline ~ArxRange() = default;
+  inline ~ArxRange();
 
   /**
    * @brief Search for documents in the index.
@@ -114,14 +114,13 @@ class ArxRange {
   /**
    * @brief Insert a document in the index.
    * @param[in] docID The document ID
-   * @param[in] eID The encrypted document ID
    * @param[in] eNID The encrypted node ID
    * @param[in] newNode The new node to insert
    * @param[in] rootNID The root node ID
    * @param[in] X The garbled input of the hardcoded value
    * @param[in,out] N Nodes to repair
    */
-  void insertDoc(size_t docID, const Cipher<16>& eID, const Cipher<16>& eNID, Node* newNode, size_t rootNID, const std::array<CipherText<GCK>, GCN/2>& X, std::set<Node*>& N);
+  void insertDoc(size_t docID, const Cipher<16>& eNID, Node* newNode, size_t rootNID, const std::array<CipherText<GCK>, GCN/2>& X, std::set<Node*>& N);
 
   /**
    * @brief Delete a document from the index.
@@ -152,8 +151,14 @@ class ArxRange {
 
 
 inline ArxRange::Node::~Node() {
-  delete children[0];
-  delete children[1];
+  delete this->gC[0];
+  delete this->gC[1];
+}
+
+inline ArxRange::~ArxRange() {
+  for (auto node: this->nodes) {
+    delete node.second;
+  }
 }
 
 

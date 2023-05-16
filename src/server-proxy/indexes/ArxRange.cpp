@@ -9,17 +9,20 @@ const auto C = COMP<GCN/2>();
 bool ArxRange::traverse(Node*& node, const std::array<CipherText<GCK>, GCN/2>& Xa, bool i, std::set<Node*>& path) {
   std::array<CipherText<GCK>, GCN> X;
   X >>= Xa;
+  Node* nextNode = node;
 
   bool y;
-  while (node) {
+  do {
+    node = nextNode;
+
     auto& gC = node->gC[i];
     X <<= gC->Xv;
 
-    y = evaluateBGCC<GCN,GCK,0,GCN/2>(X, C, gC->G, gC->d, gC->T);
+    y = evaluateBGCC(X, C, gC->G, gC->d, gC->T);
 
     path.insert(node);
-    node = node->children[y];
-  }
+    nextNode = node->children[y];
+  } while (nextNode);
 
   return y;
 }
@@ -82,7 +85,7 @@ ArxRange::Node* ArxRange::rebalance(Node* node, std::set<Node*>& N) {
   size_t rightHeight = node->children[1] ? node->children[1]->height : 0;
 
   // If unbalanced to right
-  if (rightHeight - leftHeight > 1) {
+  if (rightHeight > leftHeight && rightHeight - leftHeight > 1) {
     size_t leftHeight = node->children[1]->children[0] ? node->children[1]->children[0]->height : 0;
     size_t rightHeight = node->children[1]->children[1] ? node->children[1]->children[1]->height : 0;
 
@@ -95,7 +98,7 @@ ArxRange::Node* ArxRange::rebalance(Node* node, std::set<Node*>& N) {
   }
 
   // If unbalanced to left
-  else if (leftHeight - rightHeight > 1) {
+  else if (leftHeight > rightHeight && leftHeight - rightHeight > 1) {
     size_t leftHeight = node->children[0]->children[0] ? node->children[0]->children[0]->height : 0;
     size_t rightHeight = node->children[0]->children[1] ? node->children[0]->children[1]->height : 0;
 
@@ -149,24 +152,26 @@ void ArxRange::repairNode(size_t nid, const LightBGCC<GCN,GCK>* gC[2]) {
 }
 
 
-void ArxRange::insertDoc(size_t docID, const Cipher<16>& eID, const Cipher<16>& eNID, Node* newNode, size_t rootNID, const std::array<CipherText<GCK>, GCN/2>& X, std::set<Node*>& N) {
-  size_t nid = newNode->nid;
+void ArxRange::insertDoc(size_t docID, const Cipher<16>& eNID, Node* newNode, size_t rootNID, const std::array<CipherText<GCK>, GCN/2>& X, std::set<Node*>& N) {
+  this->nodes.insert_or_assign(newNode->nid, newNode);
+  this->nodeToDoc.insert_or_assign(newNode->nid, newNode->pk);
   this->docToNode.insert_or_assign(docID, eNID);
-  this->nodes.insert_or_assign(nid, newNode);
 
-  Node* node = this->nodes[rootNID];
-  bool dir = this->traverse(node, X, 0, N);
+  if (this->nodes.size() > 1) {
+    Node* node = this->nodes[rootNID];
+    bool dir = this->traverse(node, X, 0, N);
 
-  // Update pointers
-  node->children[dir] = newNode;
-  newNode->parent = node;
+    // Update pointers
+    node->children[dir] = newNode;
+    newNode->parent = node;
 
-  // Update parent height if necessary
-  if (node->height == 1) {
-    node->height = 2;
+    // Update parent height if necessary
+    if (node->height == 1) {
+      node->height = 2;
+    }
+
+    this->rebalance(node, N);
   }
-
-  this->rebalance(node, N);
 }
 
 

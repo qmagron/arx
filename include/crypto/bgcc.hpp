@@ -56,7 +56,7 @@ struct LightBGCC: public LightGarbledCircuit<n,1,k> {
  * @note See https://ia.cr/2016/591
  */
 template<size_t n, size_t k>
-BGCC<n,k> generateBGCC(const Circuit<n,1>& C, size_t nid, size_t nonce, size_t nidL = -1, size_t nonceL = -1, size_t nidR = -1, size_t nonceR = -1) {
+BGCC<n,k> generateBGCC(const Circuit<n,1>& C, size_t nid, size_t nonce, size_t nidL = 0, size_t nonceL = 0, size_t nidR = 0, size_t nonceR = 0) {
   constexpr std::bitset<n> x0, x1(-1);
 
   std::vector<CipherPair<k>> W;
@@ -139,22 +139,6 @@ bool evaluateBGCC(std::array<CipherText<k>, n>& X, const Circuit<n,1>& C, const 
   }
 
   return y;
-}
-
-/**
- * @brief Evaluate a branching garbled circuit chain.
- * @param[in] n The number of input wires
- * @param[in] k The security parameter
- * @param[in,out] X The garbled input that will be overwritten for the next evaluation
- * @param[in] C The circuit
- * @param[in] G The garbled table
- * @param[in] d The decode information
- * @param[in] T The transition table
- * @return The output of the circuit (L/R)
- */
-template<size_t n, size_t k>
-bool evaluateBGCC(std::array<CipherText<k>, n>& X, const Circuit<n,1>& C, const GarbledTable<k>& G, const CipherText<1>& d, const TransitionTable<n,k>& T) {
-  return evaluateBGCC<n,k,0,n>(X, C, G, d, T);
 }
 
 
