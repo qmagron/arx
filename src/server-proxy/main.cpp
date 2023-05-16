@@ -1,23 +1,128 @@
-#include "server-proxy/ServerProxy.hpp"
+#include <array>
+#include <random>
 
 #include "server-proxy/indexes/ArxRange.hpp"
-#include "crypto/bgcc.hpp"
+#include "Base.hpp"
 #include "crypto/circuits.hpp"
-#include "crypto/utils.hpp"
-#include <iostream>
 
 
-constexpr unsigned int IN_PORT = 1237;
-constexpr unsigned int REMOTE_PORT = 5432;
+const auto C = COMP<GCN/2>();
 
-const Circuit C = COMP<GCN/2>();
+/* 128 bit array key of 59E22E9D3351B9B46627F49DA8BF56D4 */
+inline byte rangeKey[AES::DEFAULT_KEYLENGTH] = {
+  0x59, 0xE2, 0x2E, 0x9D, 0x33, 0x51, 0xB9, 0xB4,
+  0x66, 0x27, 0xF4, 0x9D, 0xA8, 0xBF, 0x56, 0xD4
+};
 
+
+/* The database contains documents with random values v that will be indexed. */
+std::array<size_t, 12> database = {{
+  static_cast<size_t>(rand()), static_cast<size_t>(rand()), static_cast<size_t>(rand()),
+  static_cast<size_t>(rand()), static_cast<size_t>(rand()), static_cast<size_t>(rand()),
+  static_cast<size_t>(rand()), static_cast<size_t>(rand()), static_cast<size_t>(rand()),
+  static_cast<size_t>(rand()), static_cast<size_t>(rand()), static_cast<size_t>(rand()),
+}};
+
+
+/* The root node is stored on the client side to encode the query */
+size_t rootNode = 0;
+std::array<CipherText<GCK>, GCN/2> rootE;
+CipherText<GCK> rootR;
+
+
+/* Counters are used as nonce. */
+std::map<size_t, size_t> garbledCounter;
+
+
+/**
+ * @brief Repair a set of nodes in an ArxRange index.
+ * @param[in] index The index
+ * @param[in] nodes The set of nodes to repair
+ * @note This function only uses data from the given node.
+ */
+void repairNodes(ArxRange& index, const std::set<ArxRange::Node*>& nodes) {
+  for (auto& node: nodes) {
+    // Retrieve hardcoded value
+    size_t nid = node->nid;
+    size_t pk = Base::decryptInt(node->pk, 0, rangeKey);
+    size_t v = Base::decryptInt(node->v, pk, rangeKey);
+
+    // Compute nid and nonce for children
+    size_t nidL = node->children[0] ? node->children[0]->nid : 0;
+    size_t nidR = node->children[1] ? node->children[1]->nid : 0;
+    size_t nonceL1 = nidL ? garbledCounter[nidL]-2 : 0;
+    size_t nonceR1 = nidR ? garbledCounter[nidR]-2 : 0;
+    size_t nonceL2 = nidL ? garbledCounter[nidL]-1 : 0;
+    size_t nonceR2 = nidR ? garbledCounter[nidR]-1 : 0;
+
+    // Build new garbled circuits
+    BGCC<GCN,GCK> gC1 = generateBGCC<GCN,GCK>(C, nid, garbledCounter[nid]++, nidL, nonceL1, nidR, nonceR1);
+    BGCC<GCN,GCK> gC2 = generateBGCC<GCN,GCK>(C, nid, garbledCounter[nid]++, nidL, nonceL2, nidR, nonceR2);
+
+    // Finally repair nodes
+    const LightBGCC<GCN,GCK>* lgC[2] = { lightenBGCC(gC1,v), lightenBGCC(gC2,v) };
+    index.repairNode(nid, lgC);
+
+    // Update the root garbled circuit information if necessary
+    if (nid == rootNode) {
+      rootE >>= gC1.e;
+      rootR = gC1.R;
+    }
+  }
+}
+
+
+/**
+ * @brief Build a range index for testing purposes.
+ */
+ArxRange buildRangeIndex() {
+  ArxRange index;
+
+  // Index documents on the field v
+  for (size_t pk = 0; pk != database.size(); ++pk) {
+    size_t v = database[pk];
+    size_t nid = static_cast<size_t>(rand());
+
+    // Build initial garbled circuits
+    BGCC<GCN,GCK> gC1 = generateBGCC<GCN,GCK>(C, nid, garbledCounter[nid]++);
+    BGCC<GCN,GCK> gC2 = generateBGCC<GCN,GCK>(C, nid, garbledCounter[nid]++);
+
+    // Note that counters must be different for each index and each node.
+    // Since there is only one index, counters are only different for each node.
+    // Moreover, since there is only one node per pk, counters are only different for each pk.
+    ArxRange::Node* node = new ArxRange::Node {
+      .nid = nid,
+      .gC = { lightenBGCC(gC1,v), lightenBGCC(gC2,v) },
+      .pk = Base::encryptInt(pk, 0, rangeKey),
+      .v = Base::encryptInt(v, pk, rangeKey),
+    };
+
+    // For the demonstration, the document is inserted by traversing the index.
+    // In a real use case, the index is built without traversing to prevent
+    // garbled circuits from being consumed so there is no need to repair them.
+    std::set<ArxRange::Node*> consumedNodes;
+
+    // Encore the hardcoded value as a half garbled input and insert the document
+    std::array<CipherText<GCK>, GCN/2> Xa = encode(CipherText<GCN/2>(v), rootE, rootR);
+    index.insertDoc(pk, Base::encryptInt(node->nid, 0, rangeKey), node, rootNode, Xa, consumedNodes);
+
+    // Repair consumed nodes and those whose children have changed
+    repairNodes(index, consumedNodes);
+
+    // Update the root garbled circuit information on the first insertion
+    // These informations are stored on the client side
+    if (rootNode == 0) {
+      rootNode = node->nid;
+      rootE >>= gC1.e;
+      rootR = gC1.R;
+    }
+  }
+
+  return index;
+}
 
 int main() {
-  // ServerProxy server(IN_PORT);
-  // server.start(REMOTE_PORT);
-
-
+  ArxRange rangeIndex = buildRangeIndex();
 
 
   // std::array<CipherText<GCK>, GCN> _e0_;
@@ -93,13 +198,6 @@ int main() {
   //     ++depth;
   //   }
   // }
-
-
-
-
-
-  ArxRange index;
-
 
 
 
