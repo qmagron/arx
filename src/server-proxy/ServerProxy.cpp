@@ -24,7 +24,7 @@ void ServerProxy::rangeDelete(size_t idx, size_t rootL, size_t rootH, const std:
   ArxRange& index = this->rangeIndexes[idx];
 
   std::set<ArxRange::Node*> consumedNodes;
-  std::set<Cipher<16>> eDocs;
+  std::set<Cipher<32>> eDocs;
   index.deleteDoc(eDocs, rootL, rootH, Xl, Xh, consumedNodes);
 
   // TODO send encrypted pk to the client-proxy
@@ -43,7 +43,7 @@ void ServerProxy::rangeDeleteID(size_t idx, const EDoc& pk) {
   ArxRange& index = this->rangeIndexes[idx];
 
   std::set<ArxRange::Node*> consumedNodes;
-  Cipher<16> eNid = index.deleteID(pk, consumedNodes);
+  Cipher<32> eNid = index.deleteID(pk, consumedNodes);
 
   // TODO send encrypted nid to the client-proxy
   // TODO receive nid from the client-proxy

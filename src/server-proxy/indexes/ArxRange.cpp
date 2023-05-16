@@ -152,7 +152,7 @@ void ArxRange::repairNode(size_t nid, const LightBGCC<GCN,GCK>* gC[2]) {
 }
 
 
-void ArxRange::insertDoc(size_t docID, const Cipher<16>& eNID, Node* newNode, size_t rootNID, const std::array<CipherText<GCK>, GCN/2>& X, std::set<Node*>& N) {
+void ArxRange::insertDoc(size_t docID, const Cipher<32>& eNID, Node* newNode, size_t rootNID, const std::array<CipherText<GCK>, GCN/2>& X, std::set<Node*>& N) {
   this->nodes.insert_or_assign(newNode->nid, newNode);
   this->nodeToDoc.insert_or_assign(newNode->nid, newNode->pk);
   this->docToNode.insert_or_assign(docID, eNID);
@@ -175,7 +175,7 @@ void ArxRange::insertDoc(size_t docID, const Cipher<16>& eNID, Node* newNode, si
 }
 
 
-void ArxRange::deleteDoc(std::set<Cipher<16>>& out, size_t nidL, size_t nidH, const std::array<CipherText<GCK>, GCN/2>& Xl, const std::array<CipherText<GCK>, GCN/2>& Xh, std::set<Node*>& N) {
+void ArxRange::deleteDoc(std::set<Cipher<32>>& out, size_t nidL, size_t nidH, const std::array<CipherText<GCK>, GCN/2>& Xl, const std::array<CipherText<GCK>, GCN/2>& Xh, std::set<Node*>& N) {
   Node* nodeL = this->nodes[nidL];
   Node* nodeH = this->nodes[nidH];
 
@@ -200,9 +200,9 @@ void ArxRange::deleteDoc(std::set<Cipher<16>>& out, size_t nidL, size_t nidH, co
 }
 
 
-Cipher<16> ArxRange::deleteID(EDoc docID, std::set<Node*>& N) {
+Cipher<32> ArxRange::deleteID(EDoc docID, std::set<Node*>& N) {
   auto it = this->docToNode.find(docID);
-  Cipher<16> eNID = it->second;
+  Cipher<32> eNID = it->second;
   this->docToNode.erase(it);
   return eNID;
 }

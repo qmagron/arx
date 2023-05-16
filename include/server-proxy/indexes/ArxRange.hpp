@@ -15,7 +15,7 @@ using byte = CryptoPP::byte;
 
 template<size_t n>
 using Cipher = std::array<byte, n>;
-using EDoc = size_t;  // TODO
+using EDoc = size_t;
 
 constexpr size_t N_ROOTS = 1;
 
@@ -25,8 +25,8 @@ class ArxRange {
   struct Node {
     const size_t nid;
     const LightBGCC<GCN,GCK>* gC[2];
-    const Cipher<16> pk;
-    const Cipher<16> v;
+    const Cipher<32> pk;
+    const Cipher<32> v;
 
     Node* children[2] = { nullptr, nullptr };
     Node* parent = nullptr;
@@ -37,8 +37,8 @@ class ArxRange {
 
  private:
   std::map<size_t, Node*> nodes;
-  std::map<size_t, Cipher<16>> nodeToDoc;
-  std::map<size_t, Cipher<16>> docToNode;
+  std::map<size_t, Cipher<32>> nodeToDoc;
+  std::map<size_t, Cipher<32>> docToNode;
 
   /**
    * @brief Traverse a node of the index.
@@ -120,7 +120,7 @@ class ArxRange {
    * @param[in] X The garbled input of the hardcoded value
    * @param[in,out] N Nodes to repair
    */
-  void insertDoc(size_t docID, const Cipher<16>& eNID, Node* newNode, size_t rootNID, const std::array<CipherText<GCK>, GCN/2>& X, std::set<Node*>& N);
+  void insertDoc(size_t docID, const Cipher<32>& eNID, Node* newNode, size_t rootNID, const std::array<CipherText<GCK>, GCN/2>& X, std::set<Node*>& N);
 
   /**
    * @brief Delete a document from the index.
@@ -131,7 +131,7 @@ class ArxRange {
    * @param[in] Xh The garbled input for the higher bound
    * @param[in,out] N Nodes to repair
    */
-  void deleteDoc(std::set<Cipher<16>>& eDocs, size_t rootL, size_t rootH, const std::array<CipherText<GCK>, GCN/2>& Xl, const std::array<CipherText<GCK>, GCN/2>& Xh, std::set<Node*>& N);
+  void deleteDoc(std::set<Cipher<32>>& eDocs, size_t rootL, size_t rootH, const std::array<CipherText<GCK>, GCN/2>& Xl, const std::array<CipherText<GCK>, GCN/2>& Xh, std::set<Node*>& N);
 
   /**
    * @brief Delete a document from the index.
@@ -139,7 +139,7 @@ class ArxRange {
    * @param[in,out] N Nodes to repair
    * @return The encrypted node ID
    */
-  Cipher<16> deleteID(EDoc docID, std::set<Node*>& N);
+  Cipher<32> deleteID(EDoc docID, std::set<Node*>& N);
 
   /**
    * @brief Delete a node from the index.

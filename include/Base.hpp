@@ -25,11 +25,11 @@ namespace Base {
     inline byte iv[16] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 
-    Cipher<16> encryptBASE(std::string, byte[4], byte[16]);
-    std::string decryptBASE(Cipher<16>, byte[4], byte[16]);
+    Cipher<32> encryptBASE(std::string, byte[4], byte[16]);
+    std::string decryptBASE(Cipher<32>, byte[4], byte[16]);
 
-    Cipher<16> encryptInt(size_t, size_t, byte[16]);
-    size_t decryptInt(Cipher<16>, size_t, byte[16]);
+    Cipher<32> encryptInt(size_t, size_t, byte[16]);
+    size_t decryptInt(Cipher<32>, size_t, byte[16]);
 }
 
 #endif
