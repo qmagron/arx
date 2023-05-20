@@ -1,5 +1,7 @@
 #include "server-proxy/indexes/ArxRange.hpp"
 
+#include <iostream>
+
 #include "crypto/circuits.hpp"
 
 
@@ -8,7 +10,7 @@ const auto C = COMP<GCN/2>();
 
 bool ArxRange::traverse(Node*& node, const std::array<CipherText<GCK>, GCN/2>& Xa, bool i, std::set<Node*>& path) {
   std::array<CipherText<GCK>, GCN> X;
-  X >>= Xa;
+
   Node* nextNode = node;
 
   bool y;
@@ -16,12 +18,12 @@ bool ArxRange::traverse(Node*& node, const std::array<CipherText<GCK>, GCN/2>& X
     node = nextNode;
 
     auto& gC = node->gC[i];
-    X <<= gC->Xv;
+    X = Xa+gC->Xv;
 
     y = evaluateBGCC(X, C, gC->G, gC->d, gC->T);
 
     path.insert(node);
-    nextNode = node->children[y];
+    nextNode = node->children[!y];
   } while (nextNode);
 
   return y;
@@ -134,9 +136,9 @@ void ArxRange::searchDoc(std::vector<Node*>& out, size_t nidL, size_t nidH, cons
   this->traverse(nodeH, Xh, 1, N);
 
   // Get the nodes in (nodeL, nodeH]
-  while (nodeL != nodeH) {
-    nodeL = this->next(nodeL);
+  while (nodeL && nodeL != nodeH) {
     out.push_back(nodeL);
+    nodeL = this->next(nodeL);
   }
 }
 
@@ -162,7 +164,7 @@ void ArxRange::insertDoc(size_t docID, const Cipher<32>& eNID, Node* newNode, si
     bool dir = this->traverse(node, X, 0, N);
 
     // Update pointers
-    node->children[dir] = newNode;
+    node->children[!dir] = newNode;
     newNode->parent = node;
 
     // Update parent height if necessary
