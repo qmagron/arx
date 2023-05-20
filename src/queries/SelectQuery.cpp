@@ -50,5 +50,5 @@ void SelectQuery::encryptQuery(
     std::map<std::string, std::map<std::string, byte[16]>> field_keys
     ,byte fieldEncryptionKey[16]) {
   byte counter[4] = {0, 0, 0, 0};
-  table = Base::encryptBASE(table, counter,fieldEncryptionKey);
+  // table = Base::encryptBASE(table, counter,fieldEncryptionKey);
 }

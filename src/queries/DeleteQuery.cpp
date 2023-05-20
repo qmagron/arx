@@ -43,7 +43,7 @@ DeleteQuery::DeleteQuery(std::string query, std::string table)
 void DeleteQuery::encryptQuery(std::map<std::string, std::map<std::string, int>> counters, std::map<std::string, std::map<std::string, byte[16]>> field_keys, byte fieldEncryptionKey[16]) {
 
   byte counter[4] = { 0, 0, 0, 0 };
-  table = Base::encryptBASE(table, counter, fieldEncryptionKey);
+  // table = Base::encryptBASE(table, counter, fieldEncryptionKey);
 
   if (!checkOperatorsValidity()) {
     std::cerr << "Encrypted fields cannot have multiple similar range operators attached to them" << std::endl;
@@ -51,7 +51,7 @@ void DeleteQuery::encryptQuery(std::map<std::string, std::map<std::string, int>>
     // TODO handle this better
   }
 
-  
+
 
 }
 

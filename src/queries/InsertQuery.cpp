@@ -33,7 +33,7 @@ InsertQuery::InsertQuery(std::string query, std::string table) {
       boost::split(fields, fieldsString, boost::is_any_of(","));
       query = caughtFields.suffix().str();
     }
-    
+
     while (boost::regex_search(query, caughtValues, valuesExpr)) {
       valuesString = caughtValues[1];
 
@@ -44,7 +44,7 @@ InsertQuery::InsertQuery(std::string query, std::string table) {
     }
 
   } else if (boost::regex_match(query, exprWithoutFields)) {
-    
+
     while (boost::regex_search(query, caughtValues, valuesExpr)) {
       valuesString = caughtValues[1];
 
@@ -57,7 +57,7 @@ InsertQuery::InsertQuery(std::string query, std::string table) {
     std::cerr << "Syntax error on Update Query" << std::endl;
     throw std::exception();
   }
-  
+
 
 }
 
@@ -68,5 +68,5 @@ void InsertQuery::encryptQuery(
     std::map<std::string, std::map<std::string, byte[16]>> field_keys
     ,byte fieldEncryptionKey[16]) {
   byte counter[4] = {0, 0, 0, 0};
-  table = Base::encryptBASE(table, counter,fieldEncryptionKey);
+  // table = Base::encryptBASE(table, counter,fieldEncryptionKey);
 }

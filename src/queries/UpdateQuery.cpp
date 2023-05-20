@@ -41,8 +41,8 @@ UpdateQuery::UpdateQuery(std::string query, std::string table) {
       setClauses.push_back(Clause(temp[0], "=", temp[1]));
       caughtClauses.suffix().str();
     }
-    
-    
+
+
 
     while (boost::regex_search(temp[2], caughtClauses, whereExpr)) {
       whereClauses.push_back(
@@ -68,5 +68,5 @@ void UpdateQuery::encryptQuery(
     std::map<std::string, std::map<std::string, byte[16]>> field_keys
     ,byte fieldEncryptionKey[16]) {
   byte counter[4] = {0, 0, 0, 0};
-  table = Base::encryptBASE(table, counter,fieldEncryptionKey);
+  // table = Base::encryptBASE(table, counter,fieldEncryptionKey);
 }
