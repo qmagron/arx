@@ -147,6 +147,13 @@ class ArxRange {
    * @param[in,out] N Nodes to repair
    */
   void deleteNode(size_t nid, std::set<Node*>& N);
+
+#ifdef DEBUG
+  /**
+   * @brief Print the index.
+   */
+  void print() const;
+#endif
 };
 
 

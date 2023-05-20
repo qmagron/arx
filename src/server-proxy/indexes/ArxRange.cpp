@@ -218,3 +218,22 @@ void ArxRange::deleteNode(size_t nid, std::set<Node*>& N) {
   N.erase(node);
   delete node;
 }
+
+
+#ifdef DEBUG
+void ArxRange::print() const {
+  for (auto& [nid, node]: this->nodes) {
+    std::cout << nid << ": ";
+
+    if (node->children[0]) {
+      std::cout << node->children[0]->nid << " (L) ";
+    }
+
+    if (node->children[1]) {
+      std::cout << node->children[1]->nid << " (R)";
+    }
+
+    std::cout << std::endl;
+  }
+}
+#endif
