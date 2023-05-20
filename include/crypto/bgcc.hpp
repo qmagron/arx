@@ -132,6 +132,7 @@ bool evaluateBGCC(std::array<CipherText<k>, n>& X, const Circuit<n,1>& C, const 
 
   auto& K = W[C.out[0]];
 
+  // Compte next garbled input
   for (size_t i = 0; i < end-start; ++i) {
     bool s = X[start+i][0];  // Select bit
     hash(X[start+i], K+X[start+i]);
@@ -157,7 +158,7 @@ LightBGCC<n,k>* lightenBGCC(const BGCC<n,k>& bgcc, size_t v) {
   lbgcc->d = bgcc.d;
 
   // Encode the hardcoded input
-  lbgcc->Xv = encode<n,k,n/2,n>(CipherText<n/2>(v), bgcc.e, bgcc.R);
+  lbgcc->Xv = encode<n,k,n/2,n>(v, bgcc.e, bgcc.R);
 
   // Copy the half transition table
   for (size_t i = 0; i < n/2; ++i) {

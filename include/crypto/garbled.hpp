@@ -166,7 +166,7 @@ std::array<CipherText<k>, end-start> encode(const std::bitset<end-start>& x, con
   std::array<CipherText<k>, end-start> X;
 
   for (size_t i = 0; i < end-start; ++i) {
-    X[i] = e[start+i] ^ x[n-i-1]*R;
+    X[i] = e[start+i] ^ x[end-start-i-1]*R;
   }
 
   return X;
