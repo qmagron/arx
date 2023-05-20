@@ -141,17 +141,10 @@ constexpr std::array<std::bitset<n>, n1+n2> operator+(const std::array<std::bits
  * @return The first m bitsets of the array
  */
 template<size_t n, size_t m, size_t k>
-std::array<std::bitset<k>, m>& operator>>=(std::array<std::bitset<k>, m>& out, const std::array<std::bitset<k>, n>& in) {
-  if (m < n) {
-    for (size_t i = 0; i < m; ++i) {
-      out[i] = in[i];
-    }
-  } else {
-    for (size_t i = 0; i < n; ++i) {
-      out[m-i-1] = in[i];
-    }
+constexpr std::array<std::bitset<k>, m>& operator>>=(std::array<std::bitset<k>, m>& out, const std::array<std::bitset<k>, n>& in) {
+  for (size_t i = 0; i < m; ++i) {
+    out[i] = in[i];
   }
-
   return out;
 }
 
