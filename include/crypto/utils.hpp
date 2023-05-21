@@ -8,6 +8,9 @@
 #include <random>
 
 
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+
+
 #ifdef __CRYPTOPP_BYTE__
 using byte = CryptoPP::byte;
 #endif
@@ -132,41 +135,39 @@ constexpr std::array<std::bitset<n>, n1+n2> operator+(const std::array<std::bits
 }
 
 /**
- * @brief Retrieve the first m bitsets of an array of bitsets.
- * @param[in] n The size of the array
- * @param[in] m The number of bitsets to retrieve
+ * @brief Copy the first min(m,n) bitsets of in into the first min(m,n) bitsets of out.
+ * @param[in] n The size of the input array
+ * @param[in] m The size of the output array
  * @param[in] k The size of the bitsets
  * @param[out] out The output array
  * @param[in] in The input array
- * @return The first m bitsets of the array
+ * @return The output array
  */
 template<size_t n, size_t m, size_t k>
 constexpr std::array<std::bitset<k>, m>& operator>>=(std::array<std::bitset<k>, m>& out, const std::array<std::bitset<k>, n>& in) {
-  for (size_t i = 0; i < m; ++i) {
+  for (size_t i = 0; i < MIN(m,n); ++i) {
     out[i] = in[i];
   }
   return out;
 }
 
 /**
- * @brief Retrieve the last m bitsets of an array of bitsets.
- * @param[in] n The size of the array
- * @param[in] m The number of bitsets to retrieve
+ * @brief Copy the last min(m,n) bitsets of in into the last min(m,n) bitsets of out.
+ * @param[in] n The size of the input array
+ * @param[in] m The size of the output array
  * @param[in] k The size of the bitsets
  * @param[out] out The output array
  * @param[in] in The input array
- * @return The last m bitsets of the array
+ * @return The output array
  */
 template<size_t n, size_t m, size_t k>
 constexpr std::array<std::bitset<k>, m>& operator<<=(std::array<std::bitset<k>, m>& out, const std::array<std::bitset<k>, n>& in) {
-  if (m < n) {
-    for (size_t i = 0; i < m; ++i) {
+  for (size_t i = 0; i < MIN(m,n); ++i) {
+    #if (m < n)
       out[i] = in[n-m+i];
-    }
-  } else {
-    for (size_t i = 0; i < n; ++i) {
+    #else
       out[m-n+i] = in[i];
-    }
+    #endif
   }
 
   return out;

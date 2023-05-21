@@ -103,7 +103,10 @@ ArxRange buildRangeIndex() {
 
     // Encore the hardcoded value as a half garbled input and insert the document
     std::array<CipherText<GCK>, GCN/2> Xa = encode(CipherText<GCN/2>(v), rootE, rootR);
-    index.insertDoc(pk, Base::encryptInt(node->nid, 0, rangeKey), node, rootNode, Xa, consumedNodes);
+
+    // Insert the document into the index
+    // Note that in the example, there is only one tree so the root is always 0
+    index.insertDoc(pk, Base::encryptInt(node->nid, 0, rangeKey), node, 0, Xa, consumedNodes);
 
     // Repair consumed nodes and those whose children have changed
     repairNodes(index, consumedNodes);
@@ -136,41 +139,29 @@ int main() {
   //   struct Node {
   //     BGCC<GCN,GCK> gC;
   //     Node* children[2];
-  //     LightBGCC<GCN,GCK> lG;
+  //     LightBGCC<GCN,GCK>* lG;
   //     CipherText<GCN/2> v;
   //   };
 
-  //   Node h = { .gC = generateBGCC(C, _e0_, _R0_, _e0_, _R0_), .children = { nullptr, nullptr } };
-  //   Node i = { .gC = generateBGCC(C, _e0_, _R0_, _e0_, _R0_), .children = { nullptr, nullptr } };
-  //   Node j = { .gC = generateBGCC(C, _e0_, _R0_, _e0_, _R0_), .children = { nullptr, nullptr } };
-  //   Node k = { .gC = generateBGCC(C, _e0_, _R0_, _e0_, _R0_), .children = { nullptr, nullptr } };
-  //   Node l = { .gC = generateBGCC(C, _e0_, _R0_, _e0_, _R0_), .children = { nullptr, nullptr } };
-  //   Node m = { .gC = generateBGCC(C, _e0_, _R0_, _e0_, _R0_), .children = { nullptr, nullptr } };
-  //   Node n = { .gC = generateBGCC(C, _e0_, _R0_, _e0_, _R0_), .children = { nullptr, nullptr } };
-  //   Node o = { .gC = generateBGCC(C, _e0_, _R0_, _e0_, _R0_), .children = { nullptr, nullptr } };
-  //   Node d = { .gC = generateBGCC(C, h.gC.e, h.gC.R, i.gC.e, i.gC.R), .children = { &h, &i } };
-  //   Node e = { .gC = generateBGCC(C, j.gC.e, j.gC.R, k.gC.e, k.gC.R), .children = { &j, &k } };
-  //   Node f = { .gC = generateBGCC(C, l.gC.e, l.gC.R, m.gC.e, m.gC.R), .children = { &l, &m } };
-  //   Node g = { .gC = generateBGCC(C, n.gC.e, n.gC.R, o.gC.e, o.gC.R), .children = { &n, &o } };
-  //   Node b = { .gC = generateBGCC(C, d.gC.e, d.gC.R, e.gC.e, e.gC.R), .children = { &d, &e } };
-  //   Node c = { .gC = generateBGCC(C, f.gC.e, f.gC.R, g.gC.e, g.gC.R), .children = { &f, &g } };
-  //   Node a = { .gC = generateBGCC(C, b.gC.e, b.gC.R, c.gC.e, c.gC.R), .children = { &b, &c } };
+  //   Node h = { .gC = generateBGCC<GCN,GCK>(C,8,0), .children = { nullptr, nullptr } };
+  //   Node i = { .gC = generateBGCC<GCN,GCK>(C,9,0), .children = { nullptr, nullptr } };
+  //   Node j = { .gC = generateBGCC<GCN,GCK>(C,10,0), .children = { nullptr, nullptr } };
+  //   Node k = { .gC = generateBGCC<GCN,GCK>(C,11,0), .children = { nullptr, nullptr } };
+  //   Node l = { .gC = generateBGCC<GCN,GCK>(C,12,0), .children = { nullptr, nullptr } };
+  //   Node m = { .gC = generateBGCC<GCN,GCK>(C,13,0), .children = { nullptr, nullptr } };
+  //   Node n = { .gC = generateBGCC<GCN,GCK>(C,14,0), .children = { nullptr, nullptr } };
+  //   Node o = { .gC = generateBGCC<GCN,GCK>(C,15,0), .children = { nullptr, nullptr } };
+  //   Node d = { .gC = generateBGCC<GCN,GCK>(C, 4, 0, 8, 0, 9, 0), .children = { &h, &i } };
+  //   Node e = { .gC = generateBGCC<GCN,GCK>(C, 5, 0, 10, 0, 11, 0), .children = { &j, &k } };
+  //   Node f = { .gC = generateBGCC<GCN,GCK>(C, 6, 0, 12, 0, 13, 0), .children = { &l, &m } };
+  //   Node g = { .gC = generateBGCC<GCN,GCK>(C, 7, 0, 14, 0, 15, 0), .children = { &n, &o } };
+  //   Node b = { .gC = generateBGCC<GCN,GCK>(C, 2, 0, 4, 0, 5, 0), .children = { &d, &e } };
+  //   Node c = { .gC = generateBGCC<GCN,GCK>(C, 3, 0, 6, 0, 7, 0), .children = { &f, &g } };
+  //   Node a = { .gC = generateBGCC<GCN,GCK>(C, 1, 0, 2, 0, 3, 0), .children = { &b, &c } };
 
   //   for (Node* n: { &a, &b, &c, &d, &e, &f, &g, &h, &i, &j, &k, &l, &m, &n, &o }) {
   //     n->v = random_bitset<GCN/2>();
-  //     n->lG.d = n->gC.d;
-  //     n->lG.G = n->gC.G;
-
-  //     std::array<std::bitset<GCK>, GCN/2> halfArray;
-  //     halfArray <<= n->gC.e;
-  //     n->lG.Xv = encode(n->v, halfArray, n->gC.R);
-
-  //     for (int i = 0; i < 2; ++i) {
-  //       for (int j = 0; j < 2; ++j) {
-  //         halfArray >>= n->gC.T[i][j];
-  //         n->lG.T[i][j] = halfArray;
-  //       }
-  //     }
+  //     n->lG = lightenBGCC(n->gC, n->v.to_ulong());
   //   }
 
 
@@ -180,14 +171,16 @@ int main() {
   //   e0 >>= a.gC.e;
 
   //   auto Xa = encode(A,e0,a.gC.R);
-  //   auto X = Xa+a.lG.Xv;
+
+  //   std::array<CipherText<GCK>, GCN> X;
+  //   X >>= Xa;
 
   //   auto* _ = &a;
   //   size_t depth = 0;
 
   //   while (_) {
-  //     X <<= _->lG.Xv;
-  //     auto y = evaluateBGCC(X,C,_->lG.G,_->lG.d,_->lG.T);
+  //     X <<= _->lG->Xv;
+  //     auto y = evaluateBGCC(X,C,_->lG->G,_->lG->d,_->lG->T);
 
   //     if (y != (A.to_ulong() < _->v.to_ulong())) {
   //       std::cout << "[" << depth << "]: " << A << " < " << _->v << " != " << y << std::endl;
@@ -195,6 +188,11 @@ int main() {
 
   //     _ = _->children[y];
   //     ++depth;
+  //   }
+
+
+  //   for (Node* n: { &a, &b, &c, &d, &e, &f, &g, &h, &i, &j, &k, &l, &m, &n, &o }) {
+  //     delete n->lG;
   //   }
   // }
 

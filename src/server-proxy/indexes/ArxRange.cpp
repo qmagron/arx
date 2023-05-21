@@ -10,6 +10,7 @@ const auto C = COMP<GCN/2>();
 
 bool ArxRange::traverse(Node*& node, const std::array<CipherText<GCK>, GCN/2>& Xa, bool i, ConsumedNodes& path) {
   std::array<CipherText<GCK>, GCN> X;
+  X >>= Xa;
 
   Node* nextNode = node;
 
@@ -18,7 +19,7 @@ bool ArxRange::traverse(Node*& node, const std::array<CipherText<GCK>, GCN/2>& X
     node = nextNode;
 
     auto& gC = node->gC[i];
-    X = Xa+gC->Xv;
+    X <<= gC->Xv;
 
     y = evaluateBGCC(X, C, gC->G, gC->d, gC->T);
 
@@ -125,9 +126,9 @@ ArxRange::Node* ArxRange::remove(Node* node, ConsumedNodes& N) {
 }
 
 
-void ArxRange::searchDoc(std::vector<Node*>& out, size_t nidL, size_t nidH, const std::array<CipherText<GCK>, GCN/2>& Xl, const std::array<CipherText<GCK>, GCN/2>& Xh, ConsumedNodes& N) {
-  Node* nodeL = this->nodes[nidL];
-  Node* nodeH = this->nodes[nidH];
+void ArxRange::searchDoc(std::vector<Node*>& out, size_t treeL, size_t treeH, const std::array<CipherText<GCK>, GCN/2>& Xl, const std::array<CipherText<GCK>, GCN/2>& Xh, ConsumedNodes& N) {
+  Node* nodeL = this->root[treeL];
+  Node* nodeH = this->root[treeH];
 
   this->traverse(nodeL, Xl, 0, N);
   this->traverse(nodeH, Xh, 1, N);
@@ -151,13 +152,15 @@ void ArxRange::repairNode(size_t nid, const LightBGCC<GCN,GCK>* gC[2]) {
 }
 
 
-void ArxRange::insertDoc(size_t docID, const Cipher<32>& eNID, Node* newNode, size_t rootNID, const std::array<CipherText<GCK>, GCN/2>& X, ConsumedNodes& N) {
+void ArxRange::insertDoc(size_t docID, const Cipher<32>& eNID, Node* newNode, size_t tree, const std::array<CipherText<GCK>, GCN/2>& X, ConsumedNodes& N) {
   this->nodes.insert_or_assign(newNode->nid, newNode);
   this->nodeToDoc.insert_or_assign(newNode->nid, newNode->pk);
   this->docToNode.insert_or_assign(docID, eNID);
 
-  if (this->nodes.size() > 1) {
-    Node* node = this->nodes[rootNID];
+  if (this->root[tree] == nullptr) {
+    this->root[tree] = newNode;
+  } else {
+    Node* node = this->root[tree];
     bool dir = this->traverse(node, X, 0, N);
 
     // Update pointers
@@ -169,14 +172,17 @@ void ArxRange::insertDoc(size_t docID, const Cipher<32>& eNID, Node* newNode, si
       node->height = 2;
     }
 
-    this->rebalance(node, N);
+    while (node) {
+      this->rebalance(node, N);
+      node = node->parent;
+    }
   }
 }
 
 
-void ArxRange::deleteDoc(std::set<Cipher<32>>& out, size_t nidL, size_t nidH, const std::array<CipherText<GCK>, GCN/2>& Xl, const std::array<CipherText<GCK>, GCN/2>& Xh, ConsumedNodes& N) {
-  Node* nodeL = this->nodes[nidL];
-  Node* nodeH = this->nodes[nidH];
+void ArxRange::deleteDoc(std::set<Cipher<32>>& out, size_t treeL, size_t treeH, const std::array<CipherText<GCK>, GCN/2>& Xl, const std::array<CipherText<GCK>, GCN/2>& Xh, ConsumedNodes& N) {
+  Node* nodeL = this->root[treeL];
+  Node* nodeH = this->root[treeH];
 
   this->traverse(nodeL, Xl, 0, N);
   this->traverse(nodeH, Xh, 1, N);

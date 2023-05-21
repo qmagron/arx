@@ -44,6 +44,7 @@ class ArxRange {
   }
 
  private:
+  Node* root[N_ROOTS] = { nullptr };
   std::map<size_t, Node*> nodes;
   std::map<size_t, Cipher<32>> nodeToDoc;
   std::map<size_t, Cipher<32>> docToNode;
@@ -105,13 +106,13 @@ class ArxRange {
   /**
    * @brief Search for documents in the index.
    * @param[out] out The matching documents
-   * @param[in] rootL The root node from which to search for the lower bound
-   * @param[in] rootH The root node from which to search for the higher bound
+   * @param[in] treeL The tree id of the root node from which to search for the lower bound
+   * @param[in] treeH The tree id of the root node from which to search for the higher bound
    * @param[in] Xl The garbled input for the lower bound
    * @param[in] Xh The garbled input for the higher bound
    * @param[in,out] N Nodes to repair
    */
-  void searchDoc(std::vector<Node*>& out, size_t rootL, size_t rootH, const std::array<CipherText<GCK>, GCN/2>& Xl, const std::array<CipherText<GCK>, GCN/2>& Xh, ConsumedNodes& N);
+  void searchDoc(std::vector<Node*>& out, size_t treeL, size_t treeH, const std::array<CipherText<GCK>, GCN/2>& Xl, const std::array<CipherText<GCK>, GCN/2>& Xh, ConsumedNodes& N);
 
   /**
    * @brief Repair a node of the index.
@@ -125,22 +126,22 @@ class ArxRange {
    * @param[in] docID The document ID
    * @param[in] eNID The encrypted node ID
    * @param[in] newNode The new node to insert
-   * @param[in] rootNID The root node ID
+   * @param[in] tree The tree id of the root node
    * @param[in] X The garbled input of the hardcoded value
    * @param[in,out] N Nodes to repair
    */
-  void insertDoc(size_t docID, const Cipher<32>& eNID, Node* newNode, size_t rootNID, const std::array<CipherText<GCK>, GCN/2>& X, ConsumedNodes& N);
+  void insertDoc(size_t docID, const Cipher<32>& eNID, Node* newNode, size_t tree, const std::array<CipherText<GCK>, GCN/2>& X, ConsumedNodes& N);
 
   /**
    * @brief Delete a document from the index.
    * @param[out] eDocs The encrypted document IDs of the documents to delete
-   * @param[in] rootL The root node from which to search for the lower bound
-   * @param[in] rootH The root node from which to search for the higher bound
+   * @param[in] treeL The tree id of the root node from which to search for the lower bound
+   * @param[in] treeH The tree id of the root node from which to search for the higher bound
    * @param[in] Xl The garbled input for the lower bound
    * @param[in] Xh The garbled input for the higher bound
    * @param[in,out] N Nodes to repair
    */
-  void deleteDoc(std::set<Cipher<32>>& eDocs, size_t rootL, size_t rootH, const std::array<CipherText<GCK>, GCN/2>& Xl, const std::array<CipherText<GCK>, GCN/2>& Xh, ConsumedNodes& N);
+  void deleteDoc(std::set<Cipher<32>>& eDocs, size_t treeL, size_t treeH, const std::array<CipherText<GCK>, GCN/2>& Xl, const std::array<CipherText<GCK>, GCN/2>& Xh, ConsumedNodes& N);
 
   /**
    * @brief Delete a document from the index.
