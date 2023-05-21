@@ -2,7 +2,7 @@
 #define __SERVER_PROXY_HPP__
 
 #include <array>
-#include <vector>
+#include <set>
 
 #include "Proxy.hpp"
 #include "indexes/ArxRange.hpp"
@@ -34,7 +34,7 @@ class ServerProxy: public Proxy {
    * @param[in] index The index
    * @param[in] N The nodes to repair
    */
-  void repairNodes(ArxRange& index, ArxRange::ConsumedNodes& N);
+  void repairNodes(ArxRange& index, std::set<ArxRange::Node*>& N);
 
  protected:
   Packet forward(const Packet& inPacket) override;

@@ -6,8 +6,8 @@
 #include <map>
 #include <queue>
 #include <set>
+#include <vector>
 
-#include "server-proxy/PriorityQueue.hpp"
 #include "crypto/bgcc.hpp"
 
 
@@ -33,23 +33,18 @@ class ArxRange {
     Node* children[2] = { nullptr, nullptr };
     Node* parent = nullptr;
     size_t height = 1;
+    size_t tree = 0;
 
     inline ~Node();
   };
 
-  using ConsumedNodes = PriorityQueue<Node*, std::vector<Node*>, bool(*)(const Node*, const Node*)>;
-
-  static ConsumedNodes initConsumedNodes() {
-    return ConsumedNodes(ArxRange::cmp);
-  }
+  constexpr static bool cmp(const Node*, const Node*);
 
  private:
   Node* root[N_ROOTS] = { nullptr };
   std::map<size_t, Node*> nodes;
   std::map<size_t, Cipher<32>> nodeToDoc;
   std::map<size_t, Cipher<32>> docToNode;
-
-  constexpr static bool cmp(const Node*, const Node*);
 
   /**
    * @brief Traverse a node of the index.
@@ -59,7 +54,7 @@ class ArxRange {
    * @param[in,out] path The path to the node (will be updated)
    * @return The direction
    */
-  bool traverse(Node*& node, const std::array<CipherText<GCK>, GCN/2>& Xa, bool i, ConsumedNodes& path);
+  bool traverse(Node*& node, const std::array<CipherText<GCK>, GCN/2>& Xa, bool i, std::set<Node*>& path);
 
   /**
    * @brief Get the next node of the index.
@@ -74,7 +69,7 @@ class ArxRange {
    * @param[in,out] N Nodes to repair
    * @return The new root node
    */
-  Node* rotateRight(Node* node, ConsumedNodes& N);
+  Node* rotateRight(Node* node, std::set<Node*>& N);
 
   /**
    * @brief Rotate a node to the left.
@@ -82,7 +77,7 @@ class ArxRange {
    * @param[in,out] N Nodes to repair
    * @return The new root node
    */
-  Node* rotateLeft(Node* node, ConsumedNodes& N);
+  Node* rotateLeft(Node* node, std::set<Node*>& N);
 
   /**
    * @brief Remove a node from the index.
@@ -90,14 +85,14 @@ class ArxRange {
    * @param[in,out] N Nodes to repair
    * @return The new root node
    */
-  Node* remove(Node* node, ConsumedNodes& N);
+  Node* remove(Node* node, std::set<Node*>& N);
 
   /**
    * @brief Rebalance a node of the index.
    * @param[in] node The node to rebalance
    * @param[in,out] N Nodes to repair
    */
-  void rebalance(Node* node, ConsumedNodes& N);
+  void rebalance(Node* node, std::set<Node*>& N);
 
  public:
   inline ArxRange() = default;
@@ -112,7 +107,7 @@ class ArxRange {
    * @param[in] Xh The garbled input for the higher bound
    * @param[in,out] N Nodes to repair
    */
-  void searchDoc(std::vector<Node*>& out, size_t treeL, size_t treeH, const std::array<CipherText<GCK>, GCN/2>& Xl, const std::array<CipherText<GCK>, GCN/2>& Xh, ConsumedNodes& N);
+  void searchDoc(std::vector<Node*>& out, size_t treeL, size_t treeH, const std::array<CipherText<GCK>, GCN/2>& Xl, const std::array<CipherText<GCK>, GCN/2>& Xh, std::set<Node*>& N);
 
   /**
    * @brief Repair a node of the index.
@@ -130,7 +125,7 @@ class ArxRange {
    * @param[in] X The garbled input of the hardcoded value
    * @param[in,out] N Nodes to repair
    */
-  void insertDoc(size_t docID, const Cipher<32>& eNID, Node* newNode, size_t tree, const std::array<CipherText<GCK>, GCN/2>& X, ConsumedNodes& N);
+  void insertDoc(size_t docID, const Cipher<32>& eNID, Node* newNode, size_t tree, const std::array<CipherText<GCK>, GCN/2>& X, std::set<Node*>& N);
 
   /**
    * @brief Delete a document from the index.
@@ -141,22 +136,21 @@ class ArxRange {
    * @param[in] Xh The garbled input for the higher bound
    * @param[in,out] N Nodes to repair
    */
-  void deleteDoc(std::set<Cipher<32>>& eDocs, size_t treeL, size_t treeH, const std::array<CipherText<GCK>, GCN/2>& Xl, const std::array<CipherText<GCK>, GCN/2>& Xh, ConsumedNodes& N);
+  void deleteDoc(std::set<Cipher<32>>& eDocs, size_t treeL, size_t treeH, const std::array<CipherText<GCK>, GCN/2>& Xl, const std::array<CipherText<GCK>, GCN/2>& Xh, std::set<Node*>& N);
 
   /**
    * @brief Delete a document from the index.
    * @param[in] docID The document ID
-   * @param[in,out] N Nodes to repair
    * @return The encrypted node ID
    */
-  Cipher<32> deleteID(EDoc docID, ConsumedNodes& N);
+  Cipher<32> deleteID(EDoc docID);
 
   /**
    * @brief Delete a node from the index.
    * @param[in] nid The node ID
    * @param[in,out] N Nodes to repair
    */
-  void deleteNode(size_t nid, ConsumedNodes& N);
+  void deleteNode(size_t nid, std::set<Node*>& N);
 
 #ifdef DEBUG
   /**
