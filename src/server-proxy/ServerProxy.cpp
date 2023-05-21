@@ -23,7 +23,7 @@ Packet ServerProxy::forward(const Packet& inPacket) {
 void ServerProxy::rangeDelete(size_t idx, size_t rootL, size_t rootH, const std::array<CipherText<GCK>, GCN/2>& Xl, const std::array<CipherText<GCK>, GCN/2>& Xh) {
   ArxRange& index = this->rangeIndexes[idx];
 
-  std::set<ArxRange::Node*> consumedNodes;
+  ArxRange::ConsumedNodes consumedNodes = ArxRange::initConsumedNodes();
   std::set<Cipher<32>> eDocs;
   index.deleteDoc(eDocs, rootL, rootH, Xl, Xh, consumedNodes);
 
@@ -42,7 +42,7 @@ void ServerProxy::rangeDelete(size_t idx, size_t rootL, size_t rootH, const std:
 void ServerProxy::rangeDeleteID(size_t idx, const EDoc& pk) {
   ArxRange& index = this->rangeIndexes[idx];
 
-  std::set<ArxRange::Node*> consumedNodes;
+  ArxRange::ConsumedNodes consumedNodes = ArxRange::initConsumedNodes();
   Cipher<32> eNid = index.deleteID(pk, consumedNodes);
 
   // TODO send encrypted nid to the client-proxy
@@ -54,11 +54,14 @@ void ServerProxy::rangeDeleteID(size_t idx, const EDoc& pk) {
   this->repairNodes(index, consumedNodes);
 }
 
-void ServerProxy::repairNodes(ArxRange& index, const std::set<ArxRange::Node*>& N) {
+void ServerProxy::repairNodes(ArxRange& index, ArxRange::ConsumedNodes& N) {
   Packet headerPacket(N.size());
   this->send(headerPacket);
 
-  for (ArxRange::Node* node: N) {
+  while (!N.empty()) {
+    ArxRange::Node* node = N.top();
+    N.top();
+
     // TODO send node to the client-proxy
     // TODO receive repaired node from the client-proxy
     // TODO repair node

@@ -34,7 +34,7 @@ class ServerProxy: public Proxy {
    * @param[in] index The index
    * @param[in] N The nodes to repair
    */
-  void repairNodes(ArxRange& index, const std::set<ArxRange::Node*>& N);
+  void repairNodes(ArxRange& index, ArxRange::ConsumedNodes& N);
 
  protected:
   Packet forward(const Packet& inPacket) override;

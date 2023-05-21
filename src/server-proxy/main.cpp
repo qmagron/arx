@@ -36,8 +36,11 @@ std::map<size_t, size_t> garbledCounter;
  * @param[in] nodes The set of nodes to repair
  * @note This function only uses data from the given node.
  */
-void repairNodes(ArxRange& index, const std::set<ArxRange::Node*>& nodes) {
-  for (auto& node: nodes) {
+void repairNodes(ArxRange& index, ArxRange::ConsumedNodes& nodes) {
+  while (!nodes.empty()) {
+    ArxRange::Node* node = nodes.top();
+    nodes.pop();
+
     // Retrieve hardcoded value
     size_t nid = node->nid;
     size_t pk = Base::decryptInt(node->pk, 0, rangeKey);
@@ -96,7 +99,7 @@ ArxRange buildRangeIndex() {
     // For the demonstration, the document is inserted by traversing the index.
     // In a real use case, the initial index is built without traversing to prevent
     // garbled circuits from being consumed so there is no need to repair them.
-    std::set<ArxRange::Node*> consumedNodes;
+    ArxRange::ConsumedNodes consumedNodes = ArxRange::initConsumedNodes();
 
     // Encore the hardcoded value as a half garbled input and insert the document
     std::array<CipherText<GCK>, GCN/2> Xa = encode(CipherText<GCN/2>(v), rootE, rootR);
