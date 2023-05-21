@@ -99,6 +99,8 @@ ArxRange::Node* ArxRange::rotateLeft(Node* node, std::set<Node*>& N) {
 void ArxRange::rebalance(Node* node, std::set<Node*>& N) {
   size_t leftHeight = node->children[0] ? node->children[0]->height : 0;
   size_t rightHeight = node->children[1] ? node->children[1]->height : 0;
+  Node* top = node;
+  Node* parent = node->parent;
 
   // If unbalanced to right
   if (rightHeight > leftHeight && rightHeight - leftHeight > 1) {
@@ -111,14 +113,7 @@ void ArxRange::rebalance(Node* node, std::set<Node*>& N) {
       node->children[1]->parent = node;
     }
 
-    Node* parent = node->parent;
-    Node* top = this->rotateLeft(node, N);
-    top->parent = parent;
-
-    // Update root node if necessary
-    if (parent == nullptr) {
-      this->root[node->tree] = top;
-    }
+    top = this->rotateLeft(node, N);
   }
 
   // If unbalanced to left
@@ -132,14 +127,15 @@ void ArxRange::rebalance(Node* node, std::set<Node*>& N) {
       node->children[0]->parent = node;
     }
 
-    Node* parent = node->parent;
-    Node* top = this->rotateRight(node, N);
-    top->parent = parent;
+    top = this->rotateRight(node, N);
+  }
 
-    // Update root node if necessary
-    if (parent == nullptr) {
-      this->root[node->tree] = top;
-    }
+  top->parent = parent;
+  // Update root node if necessary
+  if (parent == nullptr) {
+    this->root[node->tree] = top;
+  } else {
+    this->rebalance(parent, N);
   }
 }
 
@@ -201,10 +197,7 @@ void ArxRange::insertDoc(size_t docID, const Cipher<32>& eNID, Node* newNode, si
       node->height = 2;
     }
 
-    while (node) {
-      this->rebalance(node, N);
-      node = node->parent;
-    }
+    this->rebalance(node, N);
   }
 }
 
