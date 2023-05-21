@@ -114,6 +114,11 @@ void ArxRange::rebalance(Node* node, std::set<Node*>& N) {
     Node* parent = node->parent;
     Node* top = this->rotateLeft(node, N);
     top->parent = parent;
+
+    // Update root node if necessary
+    if (parent == nullptr) {
+      this->root[node->tree] = top;
+    }
   }
 
   // If unbalanced to left
@@ -130,6 +135,11 @@ void ArxRange::rebalance(Node* node, std::set<Node*>& N) {
     Node* parent = node->parent;
     Node* top = this->rotateRight(node, N);
     top->parent = parent;
+
+    // Update root node if necessary
+    if (parent == nullptr) {
+      this->root[node->tree] = top;
+    }
   }
 }
 
