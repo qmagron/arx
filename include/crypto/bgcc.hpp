@@ -63,7 +63,7 @@ BGCC<n,k> generateBGCC(const Circuit<n,1>& C, size_t nid, size_t nonce, size_t n
   BGCC<n,k> bgcc{garble<n,1,k>(C, nid, nonce, W)};
 
   // If the node has children
-  if (nidL != -1 || nidR != -1) {
+  if (nidL != 0 || nidR != 0) {
     // Recompute R0 and R1
     const CipherText<k> R0 = toR<k>(nidL, nonceL);
     const CipherText<k> R1 = toR<k>(nidR, nonceR);
@@ -132,7 +132,7 @@ bool evaluateBGCC(std::array<CipherText<k>, n>& X, const Circuit<n,1>& C, const 
 
   auto& K = W[C.out[0]];
 
-  // Compte next garbled input
+  // Compute next garbled input
   for (size_t i = 0; i < end-start; ++i) {
     bool s = X[start+i][0];  // Select bit
     hash(X[start+i], K+X[start+i]);
