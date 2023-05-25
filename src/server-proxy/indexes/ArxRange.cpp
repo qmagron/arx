@@ -21,7 +21,7 @@ bool ArxRange::traverse(Node*& node, const std::array<CipherText<GCK>, GCN/2>& X
     auto gC = node->gC[i];
     X <<= gC->Xv;
 
-    dir = !evaluateBGCC(X, C, gC->G, gC->d, gC->T);
+    dir = evaluateBGCC(X, C, gC->G, gC->d, gC->T);
 
     path.insert(node);
     nextNode = node->children[dir];

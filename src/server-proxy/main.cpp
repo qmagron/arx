@@ -202,7 +202,7 @@ int main() {
   //     X <<= _->lG->Xv;
   //     auto y = evaluateBGCC(X,C,_->lG->G,_->lG->d,_->lG->T);
 
-  //     if (y != (A.to_ulong() < _->v.to_ulong())) {
+  //     if (!y != (A.to_ulong() < _->v.to_ulong())) {
   //       std::cout << "[" << depth << "]: " << A << " < " << _->v << " != " << y << std::endl;
   //     }
 

@@ -94,10 +94,10 @@ BGCC<n,k> generateBGCC(const Circuit<n,1>& C, size_t nid, size_t nonce, size_t n
     for (size_t i = 0; i < n; ++i) {
       bool s = I[DOWN][i][0];  // Select bit
 
-      hash(bgcc.T[L][0][i], K[DOWN]+I[s][i]);
-      hash(bgcc.T[R][0][i], K[UP]+I[s][i]);
-      hash(bgcc.T[L][1][i], K[DOWN]+I[!s][i]);
-      hash(bgcc.T[R][1][i], K[UP]+I[!s][i]);
+      hash(bgcc.T[L][0][i], K[UP]+I[s][i]);
+      hash(bgcc.T[R][0][i], K[DOWN]+I[s][i]);
+      hash(bgcc.T[L][1][i], K[UP]+I[!s][i]);
+      hash(bgcc.T[R][1][i], K[DOWN]+I[!s][i]);
 
       bgcc.T[L][0][i] ^= O[L][s][i];
       bgcc.T[R][0][i] ^= O[R][s][i];
@@ -120,7 +120,7 @@ BGCC<n,k> generateBGCC(const Circuit<n,1>& C, size_t nid, size_t nonce, size_t n
  * @param[in] G The garbled table
  * @param[in] d The decode information
  * @param[in] T The transition table
- * @return The output of the circuit (L/R)
+ * @return The output of the circuit (L=0 and R=1)
  */
 template<size_t n, size_t k, size_t start=0, size_t end=n/2>
 bool evaluateBGCC(std::array<CipherText<k>, n>& X, const Circuit<n,1>& C, const GarbledTable<k>& G, const CipherText<1>& d, const TransitionTable<end-start,k>& T) {
@@ -128,7 +128,7 @@ bool evaluateBGCC(std::array<CipherText<k>, n>& X, const Circuit<n,1>& C, const 
   static_assert(end <= n, "end must be smaller than n");
 
   std::vector<CipherText<k>> W;
-  bool y = decode(evaluate(X, C, G, W), d)[0];
+  bool dir = !decode(evaluate(X, C, G, W), d)[0];
 
   auto& K = W[C.out[0]];
 
@@ -136,10 +136,10 @@ bool evaluateBGCC(std::array<CipherText<k>, n>& X, const Circuit<n,1>& C, const 
   for (size_t i = 0; i < end-start; ++i) {
     bool s = X[start+i][0];  // Select bit
     hash(X[start+i], K+X[start+i]);
-    X[start+i] ^= T[y][s][i];
+    X[start+i] ^= T[dir][s][i];
   }
 
-  return y;
+  return dir;
 }
 
 
