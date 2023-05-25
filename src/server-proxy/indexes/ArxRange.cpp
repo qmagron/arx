@@ -157,9 +157,18 @@ void ArxRange::searchDoc(std::vector<Node*>& out, size_t treeL, size_t treeH, co
   Node* nodeL = this->root[treeL];
   Node* nodeH = this->root[treeH];
 
-  this->traverse(nodeL, Xl, 0, N);
-  this->traverse(nodeH, Xh, 1, N);
-  nodeH = this->next(nodeH);
+  bool includeL = !this->traverse(nodeL, Xl, 0, N);
+  bool includeH = this->traverse(nodeH, Xh, 1, N);
+
+  // include the higher node
+  if (includeH && nodeH) {
+    nodeH = this->next(nodeH);
+  }
+
+  // Do not include the lower node
+  if (!includeL && nodeL) {
+    nodeL = this->next(nodeL);
+  }
 
   // Get the nodes in [nodeL, nodeH]
   while (nodeL && nodeL != nodeH) {
