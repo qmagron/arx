@@ -57,6 +57,10 @@ struct LightBGCC: public LightGarbledCircuit<n,1,k> {
  */
 template<size_t n, size_t k>
 BGCC<n,k> generateBGCC(const Circuit<n,1>& C, size_t nid, size_t nonce, size_t nidL = 0, size_t nonceL = 0, size_t nidR = 0, size_t nonceR = 0) {
+#if DEBUG >= 3
+  printf("(%lu %lu)<-(%lu %lu):(%lu %lu)\n", nid, nonce, nidL, nonceL, nidR, nonceR);
+#endif
+
   constexpr std::bitset<n> x0, x1(-1);
 
   std::vector<CipherPair<k>> W;

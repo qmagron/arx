@@ -44,6 +44,10 @@ inline std::array<T, n> random_array() {
   std::mt19937 generator(device());
   std::uniform_int_distribution<T> d(0, std::numeric_limits<T>::max());
 
+#if DEBUG >= 2
+  std:generator.seed(0);
+#endif
+
   std::array<T, n> arr;
   for (size_t i = 0; i != n; ++i) {
     arr[i] = d(generator);

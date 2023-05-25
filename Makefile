@@ -2,6 +2,7 @@ include .env
 
 
 FLAGS = -std=c++2a -g -O2 -lcryptopp -lpthread -lboost_regex -DGCK=64 -DGCN=64
+DEBUGFLAGS = -fsanitize=address -ggdb3 -O0 -DDEBUG=2
 
 SDIR = src
 HDIR = include
@@ -45,7 +46,7 @@ $(BDIR)/server-proxy: $(SDIR)/server-proxy/main.cpp $(SPOBJS)
 
 -include $(ODIR)/*.d
 
-$(ODIR)/%.o: $(SDIR)/%.cpp $(HDIR)/%.hpp
+$(ODIR)/%.o: $(SDIR)/%.cpp $(HDIR)/%.hpp Makefile
 	@mkdir -p $(dir $@)
 	@echo -n "Compiling $@... "
 	$(CC) $(FLAGS) -c $(LIBS) -MMD -o $@ $< $(LIBFLAGS)  && echo "OK" || echo "FAIL"

@@ -89,7 +89,7 @@ ArxRange buildRangeIndex() {
     size_t nid = random_array<size_t,1>()[0];
     size_t v = database[pk];
 
-#ifdef DEBUG
+#if DEBUG >=2
     std::cout << nid << "\t->\t" << v << std::endl;
 #endif
 
@@ -130,7 +130,7 @@ ArxRange buildRangeIndex() {
     }
   }
 
-#ifdef DEBUG
+#if DEBUG >= 2
   std::cout << std::endl;
 #endif
 
@@ -174,7 +174,7 @@ void testArxRange() {
 
     ArxRange rangeIndex = buildRangeIndex();
 
-#ifdef DEBUG
+#if DEBUG >= 1
     rangeIndex.print();
     std::cout << std::endl;
 #endif
@@ -200,9 +200,9 @@ void testArxRange() {
 void printPreamble() {
   std::cout << "====================[ Database ]====================" << std::endl;
   for (size_t i = 0; i < database.size() / 2; ++i) {
-    std::cout << "database[" << i << "] = " << database[i];
+    std::cout << "database[" << i << "] = " << (size_t) database[i];
     std::cout << "  \t\t";
-    std::cout << "database[" << database.size()/2 + i << "] = " << database[database.size()/2 + i];
+    std::cout << "database[" << database.size()/2 + i << "] = " << (size_t) database[database.size()/2 + i];
     std::cout << std::endl;
   }
   std::cout << std::endl;
@@ -228,21 +228,21 @@ int main() {
   //     CipherText<GCN/2> v;
   //   };
 
-  //   Node h = { .gC = generateBGCC<GCN,GCK>(C,8,0), .children = { nullptr, nullptr } };
-  //   Node i = { .gC = generateBGCC<GCN,GCK>(C,9,0), .children = { nullptr, nullptr } };
-  //   Node j = { .gC = generateBGCC<GCN,GCK>(C,10,0), .children = { nullptr, nullptr } };
-  //   Node k = { .gC = generateBGCC<GCN,GCK>(C,11,0), .children = { nullptr, nullptr } };
-  //   Node l = { .gC = generateBGCC<GCN,GCK>(C,12,0), .children = { nullptr, nullptr } };
-  //   Node m = { .gC = generateBGCC<GCN,GCK>(C,13,0), .children = { nullptr, nullptr } };
-  //   Node n = { .gC = generateBGCC<GCN,GCK>(C,14,0), .children = { nullptr, nullptr } };
-  //   Node o = { .gC = generateBGCC<GCN,GCK>(C,15,0), .children = { nullptr, nullptr } };
-  //   Node d = { .gC = generateBGCC<GCN,GCK>(C, 4, 0, 8, 0, 9, 0), .children = { &h, &i } };
-  //   Node e = { .gC = generateBGCC<GCN,GCK>(C, 5, 0, 10, 0, 11, 0), .children = { &j, &k } };
-  //   Node f = { .gC = generateBGCC<GCN,GCK>(C, 6, 0, 12, 0, 13, 0), .children = { &l, &m } };
-  //   Node g = { .gC = generateBGCC<GCN,GCK>(C, 7, 0, 14, 0, 15, 0), .children = { &n, &o } };
-  //   Node b = { .gC = generateBGCC<GCN,GCK>(C, 2, 0, 4, 0, 5, 0), .children = { &d, &e } };
-  //   Node c = { .gC = generateBGCC<GCN,GCK>(C, 3, 0, 6, 0, 7, 0), .children = { &f, &g } };
-  //   Node a = { .gC = generateBGCC<GCN,GCK>(C, 1, 0, 2, 0, 3, 0), .children = { &b, &c } };
+  //   Node h = { .gC = generateBGCC<GCN,GCK>(C,8,8), .children = { nullptr, nullptr } };
+  //   Node i = { .gC = generateBGCC<GCN,GCK>(C,9,9), .children = { nullptr, nullptr } };
+  //   Node j = { .gC = generateBGCC<GCN,GCK>(C,10,10), .children = { nullptr, nullptr } };
+  //   Node k = { .gC = generateBGCC<GCN,GCK>(C,11,11), .children = { nullptr, nullptr } };
+  //   Node l = { .gC = generateBGCC<GCN,GCK>(C,12,12), .children = { nullptr, nullptr } };
+  //   Node m = { .gC = generateBGCC<GCN,GCK>(C,13,13), .children = { nullptr, nullptr } };
+  //   Node n = { .gC = generateBGCC<GCN,GCK>(C,14,14), .children = { nullptr, nullptr } };
+  //   Node o = { .gC = generateBGCC<GCN,GCK>(C,15,15), .children = { nullptr, nullptr } };
+  //   Node d = { .gC = generateBGCC<GCN,GCK>(C, 4, 4, 8, 8, 9, 9), .children = { &h, &i } };
+  //   Node e = { .gC = generateBGCC<GCN,GCK>(C, 5, 5, 10, 10, 11, 11), .children = { &j, &k } };
+  //   Node f = { .gC = generateBGCC<GCN,GCK>(C, 6, 6, 12, 12, 13, 13), .children = { &l, &m } };
+  //   Node g = { .gC = generateBGCC<GCN,GCK>(C, 7, 7, 14, 14, 15, 15), .children = { &n, &o } };
+  //   Node b = { .gC = generateBGCC<GCN,GCK>(C, 2, 2, 4, 4, 5, 5), .children = { &d, &e } };
+  //   Node c = { .gC = generateBGCC<GCN,GCK>(C, 3, 3, 6, 6, 7, 7), .children = { &f, &g } };
+  //   Node a = { .gC = generateBGCC<GCN,GCK>(C, 1, 1, 2, 2, 3, 3), .children = { &b, &c } };
 
   //   for (Node* n: { &a, &b, &c, &d, &e, &f, &g, &h, &i, &j, &k, &l, &m, &n, &o }) {
   //     n->v = random_bitset<GCN/2>();
