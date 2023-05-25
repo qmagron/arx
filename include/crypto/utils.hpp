@@ -21,7 +21,7 @@ using byte = CryptoPP::byte;
  * @param[in] k The size of the bitset.
  */
 template<size_t k>
-constexpr std::bitset<k> random_bitset() {
+inline std::bitset<k> random_bitset() {
   std::bitset<k> b;
 
   std::random_device device;
@@ -39,7 +39,7 @@ constexpr std::bitset<k> random_bitset() {
  * @brief Generate a random array of numeric type.
  */
 template<class T, size_t n>
-constexpr std::array<T, n> random_array() {
+inline std::array<T, n> random_array() {
   std::random_device device;
   std::mt19937 generator(device());
   std::uniform_int_distribution<T> d(0, std::numeric_limits<T>::max());
