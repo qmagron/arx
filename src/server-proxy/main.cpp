@@ -177,7 +177,54 @@ std::vector<size_t> select(ArxRange& index, unsigned low, unsigned high) {
 }
 
 
-void testArxRange() {
+bool testArxRange(ArxRange& rangeIndex, unsigned low, unsigned high) {
+  std::cout << "--------------------[ SELECT between " << low <<  " and " << high << " ]--------------------" << std::endl;
+
+  // Fill expected
+  std::vector<size_t> expected;
+  for (size_t pk = 0; pk < database.size(); ++pk) {
+    if (database[pk] >= low && database[pk] <= high) {
+      expected.push_back(pk);
+    }
+  }
+  std::sort(expected.begin(), expected.end(), [&](size_t pk1, size_t pk2) { return database[pk1] < database[pk2]; });
+
+  // Fetch the index
+  std::vector<size_t> received = select(rangeIndex, low, high);
+
+  // 1. Check the size
+  if (received.size() == expected.size()) {
+    std::cout << "Size: OK" << std::endl;
+  } else {
+    std::cerr << "Size: FAIL" << std::endl;
+    std::cerr << "  Expected: " << expected.size() << std::endl;
+    std::cerr << "  Got: " << received.size() << std::endl;
+    std::cerr << "  Got: "; for (auto& doc: received) std::cerr << doc << " "; std::cerr << std::endl;
+    return false;
+  }
+
+  // 2. Check the order of the documents
+  bool ok = true;
+  for (size_t d = 0; d < expected.size(); ++d) {
+    if (received[d] != expected[d]) {
+      std::cerr << "Content: FAIL" << std::endl;
+      std::cerr << "  Expected: " << expected[d] << std::endl;
+      std::cerr << "  Got: " << received[d] << std::endl;
+      std::cerr << "  Got: "; for (auto& doc: received) std::cerr << doc << " "; std::cerr << std::endl;
+      ok = false;
+      break;
+    }
+  }
+
+  if (ok) {
+    std::cout << "Content: OK" << std::endl;
+  }
+
+  return ok;
+}
+
+
+void testArxRanges() {
   std::cout << "====================[ ArxRange ]====================" << std::endl;
 
   ArxRange rangeIndex = buildRangeIndex();
@@ -187,20 +234,21 @@ void testArxRange() {
     std::cout << std::endl;
 #endif
 
-  {
-    std::cout << "--------------------[ SELECT * ]--------------------" << std::endl;
+  unsigned ranges[][2] = {
+    { 0               , (unsigned)-1 },
+    { 0               , ((unsigned)-1)/2 },
+    { ((unsigned)-1)/2, (unsigned)-1 },
+  };
 
-    std::vector<size_t> docs = select(rangeIndex, 0, -1);
+  // Predefined ranges
+  for (auto& range: ranges) {
+    testArxRange(rangeIndex, range[0], range[1]);
+  }
 
-    // All documents should be fetched
-    if (docs.size() == database.size()) {
-      std::cout << "Size: OK" << std::endl;
-    } else {
-      std::cerr << "Size: FAIL" << std::endl;
-      std::cerr << "  Expected: " << database.size() << std::endl;
-      std::cerr << "  Got: " << docs.size() << std::endl;
-      std::cerr << "  Got: "; for (auto& doc: docs) std::cerr << doc << " "; std::cerr << std::endl;
-    }
+  // Random ranges
+  for (size_t i = 0; i < 2; ++i) {
+    auto bounds = random_array<unsigned, 2>();
+    testArxRange(rangeIndex, std::min(bounds[0], bounds[1]), std::max(bounds[0], bounds[1]));
   }
 }
 
@@ -219,9 +267,11 @@ void printPreamble() {
 
 int main() {
   printPreamble();
-  testArxRange();
+  testArxRanges();
 
 
+
+  // PoC for raw BGCC
 
   // //        a
   // //    b       c

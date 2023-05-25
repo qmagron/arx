@@ -1,7 +1,7 @@
 include .env
 
 
-FLAGS = -std=c++2a -g -O2 -lcryptopp -lpthread -lboost_regex -DGCK=64 -DGCN=64
+FLAGS = -std=c++2a -g -O2 -lcryptopp -lpthread -lboost_regex -DGCK=64 -DGCN=64 #$(DEBUGFLAGS)
 DEBUGFLAGS = -fsanitize=address -ggdb3 -O0 -DDEBUG=2
 
 SDIR = src
