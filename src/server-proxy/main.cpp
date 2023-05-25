@@ -9,6 +9,9 @@
 #include "crypto/utils.hpp"
 
 
+constexpr size_t N_DOCS = 100;
+
+
 const auto C = COMP<GCN/2>();
 
 /* 128 bit array key of 59E22E9D3351B9B46627F49DA8BF56D4 */
@@ -19,7 +22,7 @@ inline byte rangeKey[AES::DEFAULT_KEYLENGTH] = {
 
 
 /* The database contains documents with random values v that will be indexed. */
-std::array<unsigned, 12> database = random_array<unsigned, 12>();
+std::array<unsigned, N_DOCS> database = random_array<unsigned, N_DOCS>();
 
 
 /* The root node is stored on the client side to encode the query */
