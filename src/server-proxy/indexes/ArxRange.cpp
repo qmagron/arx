@@ -57,6 +57,7 @@ ArxRange::Node* ArxRange::rotateRight(Node* node, std::set<Node*>& N) {
   left->children[1] = node;
 
   // Update parents
+  left->parent = node->parent;
   node->parent = left;
   if (node->children[0]) {
     node->children[0]->parent = node;
@@ -80,6 +81,7 @@ ArxRange::Node* ArxRange::rotateLeft(Node* node, std::set<Node*>& N) {
   right->children[0] = node;
 
   // Update parents
+  right->parent = node->parent;
   node->parent = right;
   if (node->children[1]) {
     node->children[1]->parent = node;
@@ -109,9 +111,8 @@ void ArxRange::rebalance(Node* node, std::set<Node*>& N) {
     size_t rightHeight = node->children[1]->children[1] ? node->children[1]->children[1]->height : 0;
 
     // If right child is unbalanced to left
-    if (rightHeight - leftHeight < 0) {
+    if (leftHeight > rightHeight) {
       node->children[1] = this->rotateRight(node->children[1], N);
-      node->children[1]->parent = node;
     }
 
     top = this->rotateLeft(node, N);
@@ -123,15 +124,13 @@ void ArxRange::rebalance(Node* node, std::set<Node*>& N) {
     size_t rightHeight = node->children[0]->children[1] ? node->children[0]->children[1]->height : 0;
 
     // If left child is unbalanced to right
-    if (rightHeight - leftHeight < 0) {
+    if (rightHeight > leftHeight) {
       node->children[0] = this->rotateLeft(node->children[0], N);
-      node->children[0]->parent = node;
     }
 
     top = this->rotateRight(node, N);
   }
 
-  top->parent = parent;
   // Update root node if necessary
   if (parent == nullptr) {
     this->root[node->tree] = top;
