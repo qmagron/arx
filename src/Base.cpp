@@ -28,7 +28,7 @@ using byte = CryptoPP::byte;
  * @param[in] key The key
  * @return The encrypted integer
  */
-Cipher<32> Base::encryptInt(size_t plain, size_t nonce, byte key[16]) {
+Cipher<32> Base::encryptInt(unsigned plain, size_t nonce, byte key[16]) {
   byte eCounter[4];
   CryptoPP::Integer(nonce).Encode(eCounter, 4);
   return Base::encryptBASE(std::to_string(plain), eCounter, key);
@@ -41,7 +41,7 @@ Cipher<32> Base::encryptInt(size_t plain, size_t nonce, byte key[16]) {
  * @param[in] key The key
  * @return The decrypted integer
  */
-size_t Base::decryptInt(Cipher<32> cipher, size_t nonce, byte key[16]) {
+unsigned Base::decryptInt(Cipher<32> cipher, size_t nonce, byte key[16]) {
   byte eCounter[4];
   CryptoPP::Integer(nonce).Encode(eCounter, 4);
   return std::stoul(Base::decryptBASE(cipher, eCounter, key));

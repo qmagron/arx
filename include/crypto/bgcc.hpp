@@ -154,7 +154,7 @@ bool evaluateBGCC(std::array<CipherText<k>, n>& X, const Circuit<n,1>& C, const 
  * @return A pointer to the light branching garbled circuit
  */
 template<size_t n, size_t k>
-LightBGCC<n,k>* lightenBGCC(const BGCC<n,k>& bgcc, size_t v) {
+LightBGCC<n,k>* lightenBGCC(const BGCC<n,k>& bgcc, unsigned v) {
   LightBGCC<n,k>* lbgcc = new LightBGCC<n,k>;
 
   // Copy the garbled table and the decode information

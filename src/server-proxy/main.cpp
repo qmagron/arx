@@ -19,7 +19,7 @@ inline byte rangeKey[AES::DEFAULT_KEYLENGTH] = {
 
 
 /* The database contains documents with random values v that will be indexed. */
-std::array<size_t, 12> database = random_array<size_t, 12>();
+std::array<unsigned, 12> database = random_array<unsigned, 12>();
 
 
 /* The root node is stored on the client side to encode the query */
@@ -51,7 +51,7 @@ void repairNodes(ArxRange& index, std::set<ArxRange::Node*>& nodes) {
     // Retrieve hardcoded value
     size_t nid = node->nid;
     size_t pk = Base::decryptInt(node->pk, 0, rangeKey);
-    size_t v = Base::decryptInt(node->v, pk, rangeKey);
+    unsigned v = Base::decryptInt(node->v, pk, rangeKey);
 
     // Compute nid and nonce for children
     size_t nidL = node->children[0] ? node->children[0]->nid : 0;
@@ -170,30 +170,30 @@ std::vector<size_t> select(ArxRange& index, size_t low, size_t high) {
 
 
 void testArxRange() {
-    std::cout << "====================[ ArxRange ]====================" << std::endl;
+  std::cout << "====================[ ArxRange ]====================" << std::endl;
 
-    ArxRange rangeIndex = buildRangeIndex();
+  ArxRange rangeIndex = buildRangeIndex();
 
 #if DEBUG >= 1
     rangeIndex.print();
     std::cout << std::endl;
 #endif
 
-    {
-      std::cout << "--------------------[ SELECT * ]--------------------" << std::endl;
+  {
+    std::cout << "--------------------[ SELECT * ]--------------------" << std::endl;
 
-      std::vector<size_t> docs = select(rangeIndex, 0, -1);
+    std::vector<size_t> docs = select(rangeIndex, 0, -1);
 
-      // All documents should be fetched
-      if (docs.size() == database.size()) {
-        std::cout << "Size: OK" << std::endl;
-      } else {
-        std::cerr << "Size: FAIL" << std::endl;
-        std::cerr << "  Expected: " << database.size() << std::endl;
-        std::cerr << "  Got: " << docs.size() << std::endl;
-        std::cerr << "  Got: "; for (auto& doc: docs) std::cerr << doc << " "; std::cerr << std::endl;
-      }
+    // All documents should be fetched
+    if (docs.size() == database.size()) {
+      std::cout << "Size: OK" << std::endl;
+    } else {
+      std::cerr << "Size: FAIL" << std::endl;
+      std::cerr << "  Expected: " << database.size() << std::endl;
+      std::cerr << "  Got: " << docs.size() << std::endl;
+      std::cerr << "  Got: "; for (auto& doc: docs) std::cerr << doc << " "; std::cerr << std::endl;
     }
+  }
 }
 
 
@@ -225,7 +225,7 @@ int main() {
   //     BGCC<GCN,GCK> gC;
   //     Node* children[2];
   //     LightBGCC<GCN,GCK>* lG;
-  //     CipherText<GCN/2> v;
+  //     unsigned v;
   //   };
 
   //   Node h = { .gC = generateBGCC<GCN,GCK>(C,8,8), .children = { nullptr, nullptr } };
@@ -236,17 +236,17 @@ int main() {
   //   Node m = { .gC = generateBGCC<GCN,GCK>(C,13,13), .children = { nullptr, nullptr } };
   //   Node n = { .gC = generateBGCC<GCN,GCK>(C,14,14), .children = { nullptr, nullptr } };
   //   Node o = { .gC = generateBGCC<GCN,GCK>(C,15,15), .children = { nullptr, nullptr } };
-  //   Node d = { .gC = generateBGCC<GCN,GCK>(C, 4, 4, 8, 8, 9, 9), .children = { &h, &i } };
-  //   Node e = { .gC = generateBGCC<GCN,GCK>(C, 5, 5, 10, 10, 11, 11), .children = { &j, &k } };
-  //   Node f = { .gC = generateBGCC<GCN,GCK>(C, 6, 6, 12, 12, 13, 13), .children = { &l, &m } };
-  //   Node g = { .gC = generateBGCC<GCN,GCK>(C, 7, 7, 14, 14, 15, 15), .children = { &n, &o } };
-  //   Node b = { .gC = generateBGCC<GCN,GCK>(C, 2, 2, 4, 4, 5, 5), .children = { &d, &e } };
-  //   Node c = { .gC = generateBGCC<GCN,GCK>(C, 3, 3, 6, 6, 7, 7), .children = { &f, &g } };
-  //   Node a = { .gC = generateBGCC<GCN,GCK>(C, 1, 1, 2, 2, 3, 3), .children = { &b, &c } };
+  //   Node d = { .gC = generateBGCC<GCN,GCK>(C,4,4,8,8,9,9), .children = { &h, &i } };
+  //   Node e = { .gC = generateBGCC<GCN,GCK>(C,5,5,10,10,11,11), .children = { &j, &k } };
+  //   Node f = { .gC = generateBGCC<GCN,GCK>(C,6,6,12,12,13,13), .children = { &l, &m } };
+  //   Node g = { .gC = generateBGCC<GCN,GCK>(C,7,7,14,14,15,15), .children = { &n, &o } };
+  //   Node b = { .gC = generateBGCC<GCN,GCK>(C,2,2,4,4,5,5), .children = { &d, &e } };
+  //   Node c = { .gC = generateBGCC<GCN,GCK>(C,3,3,6,6,7,7), .children = { &f, &g } };
+  //   Node a = { .gC = generateBGCC<GCN,GCK>(C,1,1,2,2,3,3), .children = { &b, &c } };
 
   //   for (Node* n: { &a, &b, &c, &d, &e, &f, &g, &h, &i, &j, &k, &l, &m, &n, &o }) {
-  //     n->v = random_bitset<GCN/2>();
-  //     n->lG = lightenBGCC(n->gC, n->v.to_ulong());
+  //     n->v = random_array<unsigned, 1>()[0];
+  //     n->lG = lightenBGCC(n->gC, n->v);
   //   }
 
 
@@ -267,8 +267,8 @@ int main() {
   //     X <<= _->lG->Xv;
   //     auto y = evaluateBGCC(X,C,_->lG->G,_->lG->d,_->lG->T);
 
-  //     if (!y != (A.to_ulong() < _->v.to_ulong())) {
-  //       std::cout << "[" << depth << "]: " << A << " < " << _->v << " != " << y << std::endl;
+  //     if (!y != (A.to_ulong() < _->v)) {
+  //       std::cout << "[" << depth << "]: " << A.to_ulong() << " < " << _->v << " != " << !y << std::endl;
   //     }
 
   //     _ = _->children[y];

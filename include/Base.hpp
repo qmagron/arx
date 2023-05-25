@@ -28,8 +28,8 @@ namespace Base {
     Cipher<32> encryptBASE(std::string, byte[4], byte[16]);
     std::string decryptBASE(Cipher<32>, byte[4], byte[16]);
 
-    Cipher<32> encryptInt(size_t, size_t, byte[16]);
-    size_t decryptInt(Cipher<32>, size_t, byte[16]);
+    Cipher<32> encryptInt(unsigned, size_t, byte[16]);
+    unsigned decryptInt(Cipher<32>, size_t, byte[16]);
 }
 
 #endif
