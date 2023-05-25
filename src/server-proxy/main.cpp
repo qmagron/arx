@@ -23,7 +23,6 @@ std::array<size_t, 12> database = random_array<size_t, 12>();
 
 
 /* The root node is stored on the client side to encode the query */
-size_t rootNode = 0;
 std::array<CipherText<GCK>, GCN/2> rootE;
 CipherText<GCK> rootR;
 
@@ -67,7 +66,7 @@ void repairNodes(ArxRange& index, std::set<ArxRange::Node*>& nodes) {
     index.repairNode(nid, lgC);
 
     // Update the root garbled circuit information if necessary
-    if (nid == rootNode) {
+    if (node->parent == nullptr) {
       rootE >>= gC1.e;
       rootR = gC1.R;
     }
@@ -83,8 +82,13 @@ ArxRange buildRangeIndex() {
 
   // Index documents on the field v
   for (size_t pk = 0; pk != database.size(); ++pk) {
+    // size_t nid = random_array<size_t,1>()[0];
+    size_t nid = pk+1;
     size_t v = database[pk];
-    size_t nid = static_cast<size_t>(rand());
+
+#ifdef DEBUG
+    std::cout << nid << "\t->\t" << v << std::endl;
+#endif
 
     // Build initial garbled circuits
     BGCC<GCN,GCK> gC1 = generateBGCC<GCN,GCK>(C, nid, garbledCounter[nid]++);
@@ -117,8 +121,7 @@ ArxRange buildRangeIndex() {
 
     // Update the root garbled circuit information on the first insertion
     // These informations are stored on the client side
-    if (rootNode == 0) {
-      rootNode = node->nid;
+    if (node->parent == nullptr) {
       rootE >>= gC1.e;
       rootR = gC1.R;
     }
@@ -127,8 +130,23 @@ ArxRange buildRangeIndex() {
   return index;
 }
 
+
+void printPreamble() {
+  std::cout << "====================[ Database ]====================" << std::endl;
+  for (size_t i = 0; i < database.size() / 2; ++i) {
+    std::cout << "database[" << i << "] = " << database[i];
+    std::cout << "  \t\t";
+    std::cout << "database[" << database.size()/2 + i << "] = " << database[database.size()/2 + i];
+    std::cout << std::endl;
+  }
+  std::cout << std::endl;
+}
+
+
 int main() {
-  ArxRange rangeIndex = buildRangeIndex();
+  printPreamble();
+  testArxRange();
+
 
 
   // std::array<CipherText<GCK>, GCN> _e0_;
