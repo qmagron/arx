@@ -131,7 +131,70 @@ ArxRange buildRangeIndex() {
     }
   }
 
+#ifdef DEBUG
+  std::cout << std::endl;
+#endif
+
   return index;
+}
+
+
+/**
+ * @brief Select documents in a given range.
+ * @param[in] index The range index
+ * @param[in] low The lower bound
+ * @param[in] high The higher bound
+ * @return The list of primary keys of documents in the given range
+ */
+std::vector<size_t> select(ArxRange& index, size_t low, size_t high) {
+  // Encode the query
+  std::array<CipherText<GCK>, GCN/2> Xl = encode(low, rootE, rootR);
+  std::array<CipherText<GCK>, GCN/2> Xh = encode(high, rootE, rootR);
+
+  // Search for documents between the lower and higher bounds
+  std::vector<ArxRange::Node*> out;
+  std::set<ArxRange::Node*> consumedNodes;
+  index.searchDoc(out, 0, 0, Xl, Xh, consumedNodes);
+
+  // Decrypt the primary keys
+  std::vector<size_t> docs;
+  for (auto& node: out) {
+    size_t pk = Base::decryptInt(node->pk, 0, rangeKey);
+    docs.push_back(pk);
+  }
+
+  // Repair consumed nodes
+  repairNodes(index, consumedNodes);
+
+  return docs;
+}
+
+
+void testArxRange() {
+    std::cout << "====================[ ArxRange ]====================" << std::endl;
+
+    ArxRange rangeIndex = buildRangeIndex();
+
+#ifdef DEBUG
+    rangeIndex.print();
+    std::cout << std::endl;
+#endif
+
+    {
+      std::cout << "--------------------[ SELECT * ]--------------------" << std::endl;
+
+      std::vector<size_t> docs = select(rangeIndex, 0, -1);
+
+      // All documents should be fetched
+      if (docs.size() == database.size()) {
+        std::cout << "Size: OK" << std::endl;
+      } else {
+        std::cerr << "Size: FAIL" << std::endl;
+        std::cerr << "  Expected: " << database.size() << std::endl;
+        std::cerr << "  Got: " << docs.size() << std::endl;
+        std::cerr << "  Got: "; for (auto& doc: docs) std::cerr << doc << " "; std::cerr << std::endl;
+      }
+    }
 }
 
 
