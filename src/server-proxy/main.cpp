@@ -23,6 +23,7 @@ std::array<size_t, 12> database = random_array<size_t, 12>();
 
 
 /* The root node is stored on the client side to encode the query */
+bool hasRoot = false;
 std::array<CipherText<GCK>, GCN/2> rootE;
 CipherText<GCK> rootR;
 
@@ -110,7 +111,7 @@ ArxRange buildRangeIndex() {
     std::set<ArxRange::Node*> consumedNodes;
 
     // Encore the hardcoded value as a half garbled input and insert the document
-    std::array<CipherText<GCK>, GCN/2> Xa = encode(CipherText<GCN/2>(v), rootE, rootR);
+    std::array<CipherText<GCK>, GCN/2> Xa = encode(v, rootE, rootR);
 
     // Insert the document into the index
     // Note that in the example, there is only one tree so the root is always 0
@@ -119,9 +120,9 @@ ArxRange buildRangeIndex() {
     // Repair consumed nodes and those whose children have changed
     repairNodes(index, consumedNodes);
 
-    // Update the root garbled circuit information on the first insertion
-    // These informations are stored on the client side
-    if (node->parent == nullptr) {
+    // Update the root garbled circuit information on the client side
+    if (!hasRoot) {
+      hasRoot = true;
       rootE >>= gC1.e;
       rootR = gC1.R;
     }
@@ -148,9 +149,6 @@ int main() {
   testArxRange();
 
 
-
-  // std::array<CipherText<GCK>, GCN> _e0_;
-  // CipherText<GCK> _R0_ = random_bitset<GCK>();
 
   // //        a
   // //    b       c
