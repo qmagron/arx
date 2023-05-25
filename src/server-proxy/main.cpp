@@ -40,11 +40,15 @@ std::map<size_t, size_t> garbledCounter;
  */
 void repairNodes(ArxRange& index, std::set<ArxRange::Node*>& nodes) {
   std::vector<ArxRange::Node*> vNodes(nodes.begin(), nodes.end());
-  std::sort(vNodes.rbegin(), vNodes.rend());
+
+  // Sort nodes by increasing height
+  std::sort(vNodes.begin(), vNodes.end(), [](ArxRange::Node* a, ArxRange::Node* b) {
+    return a->height < b->height;
+  });
 
   for (ArxRange::Node* node: vNodes) {
     // Skip leaf nodes
-    if (!node->children[0] && !node->children[1]) {
+    if (node->height == 1) {
       continue;
     }
 
