@@ -14,20 +14,20 @@ bool ArxRange::traverse(Node*& node, const std::array<CipherText<GCK>, GCN/2>& X
 
   Node* nextNode = node;
 
-  bool y;
+  bool dir;
   do {
     node = nextNode;
 
-    auto& gC = node->gC[i];
+    auto gC = node->gC[i];
     X <<= gC->Xv;
 
-    y = evaluateBGCC(X, C, gC->G, gC->d, gC->T);
+    dir = !evaluateBGCC(X, C, gC->G, gC->d, gC->T);
 
     path.insert(node);
-    nextNode = node->children[!y];
+    nextNode = node->children[dir];
   } while (nextNode);
 
-  return y;
+  return dir;
 }
 
 
@@ -189,7 +189,7 @@ void ArxRange::insertDoc(size_t docID, const Cipher<32>& eNID, Node* newNode, si
     bool dir = this->traverse(node, X, 0, N);
 
     // Update pointers
-    node->children[!dir] = newNode;
+    node->children[dir] = newNode;
     newNode->parent = node;
 
     // Update parent height if necessary
