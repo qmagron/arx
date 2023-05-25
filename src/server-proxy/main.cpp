@@ -86,8 +86,7 @@ ArxRange buildRangeIndex() {
 
   // Index documents on the field v
   for (size_t pk = 0; pk != database.size(); ++pk) {
-    // size_t nid = random_array<size_t,1>()[0];
-    size_t nid = pk+1;
+    size_t nid = random_array<size_t,1>()[0];
     size_t v = database[pk];
 
 #ifdef DEBUG

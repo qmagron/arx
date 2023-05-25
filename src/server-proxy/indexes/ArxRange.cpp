@@ -21,6 +21,7 @@ bool ArxRange::traverse(Node*& node, const std::array<CipherText<GCK>, GCN/2>& X
     auto gC = node->gC[i];
     X <<= gC->Xv;
 
+    // TODO handle v=0
     dir = evaluateBGCC(X, C, gC->G, gC->d, gC->T);
 
     path.insert(node);
@@ -161,7 +162,7 @@ void ArxRange::searchDoc(std::vector<Node*>& out, size_t treeL, size_t treeH, co
   this->traverse(nodeH, Xh, 1, N);
   nodeH = this->next(nodeH);
 
-  // Get the nodes in (nodeL, nodeH]
+  // Get the nodes in [nodeL, nodeH]
   while (nodeL && nodeL != nodeH) {
     out.push_back(nodeL);
     nodeL = this->next(nodeL);
@@ -206,19 +207,8 @@ void ArxRange::insertDoc(size_t docID, const Cipher<32>& eNID, Node* newNode, si
 
 
 void ArxRange::deleteDoc(std::set<Cipher<32>>& out, size_t treeL, size_t treeH, const std::array<CipherText<GCK>, GCN/2>& Xl, const std::array<CipherText<GCK>, GCN/2>& Xh, std::set<Node*>& N) {
-  Node* nodeL = this->root[treeL];
-  Node* nodeH = this->root[treeH];
-
-  this->traverse(nodeL, Xl, 0, N);
-  this->traverse(nodeH, Xh, 1, N);
-  nodeH = this->next(nodeH);
-
-  // Get the nodes in (nodeL, nodeH]
   std::vector<Node*> S;
-  while (nodeL != nodeH) {
-    nodeL = this->next(nodeL);
-    S.push_back(nodeL);
-  }
+  searchDoc(S, treeL, treeH, Xl, Xh, N);
 
   for (Node* node: S) {
     out.insert(node->pk);
