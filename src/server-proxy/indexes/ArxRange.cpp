@@ -135,6 +135,8 @@ void ArxRange::rebalance(Node* node, std::set<Node*>& N) {
   if (parent == nullptr) {
     this->root[node->tree] = top;
   } else {
+    parent->children[parent->children[1] == node] = top;
+    parent->height = std::max(parent->children[0] ? parent->children[0]->height : 0, parent->children[1] ? parent->children[1]->height : 0) + 1;
     this->rebalance(parent, N);
   }
 }
