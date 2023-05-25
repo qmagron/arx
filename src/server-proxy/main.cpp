@@ -39,7 +39,10 @@ std::map<size_t, size_t> garbledCounter;
  * @note This function only uses data from the given node.
  */
 void repairNodes(ArxRange& index, std::set<ArxRange::Node*>& nodes) {
-  for (ArxRange::Node* node: nodes) {
+  std::vector<ArxRange::Node*> vNodes(nodes.begin(), nodes.end());
+  std::sort(vNodes.rbegin(), vNodes.rend());
+
+  for (ArxRange::Node* node: vNodes) {
     // Skip leaf nodes
     if (!node->children[0] && !node->children[1]) {
       continue;

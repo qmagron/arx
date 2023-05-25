@@ -36,9 +36,8 @@ class ArxRange {
     size_t tree = 0;
 
     inline ~Node();
+    inline bool operator<(const Node& other) const;
   };
-
-  constexpr static bool cmp(const Node*, const Node*);
 
  private:
   Node* root[N_ROOTS] = { nullptr };
@@ -166,14 +165,14 @@ inline ArxRange::Node::~Node() {
   delete this->gC[1];
 }
 
+inline bool ArxRange::Node::operator<(const Node& other) const {
+  return this->height < other.height;
+}
+
 inline ArxRange::~ArxRange() {
   for (auto node: this->nodes) {
     delete node.second;
   }
-}
-
-constexpr bool ArxRange::cmp(const Node* n, const Node* m) {
-  return n->height < m->height;
 }
 
 
