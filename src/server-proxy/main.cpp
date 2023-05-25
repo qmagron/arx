@@ -24,8 +24,8 @@ std::array<unsigned, 12> database = random_array<unsigned, 12>();
 
 /* The root node is stored on the client side to encode the query */
 bool hasRoot = false;
-std::array<CipherText<GCK>, GCN/2> rootE;
-CipherText<GCK> rootR;
+std::array<CipherText<GCK>, GCN/2> rootE[2];
+CipherText<GCK> rootR[2];
 
 
 /* Counters are used as nonce. */
@@ -75,8 +75,10 @@ void repairNodes(ArxRange& index, std::set<ArxRange::Node*>& nodes) {
 
     // Update the root garbled circuit information if necessary
     if (node->parent == nullptr) {
-      rootE >>= gC1.e;
-      rootR = gC1.R;
+      rootE[0] >>= gC1.e;
+      rootR[0] = gC1.R;
+      rootE[1] >>= gC2.e;
+      rootR[1] = gC2.R;
     }
   }
 }
@@ -117,7 +119,7 @@ ArxRange buildRangeIndex() {
     std::set<ArxRange::Node*> consumedNodes;
 
     // Encore the hardcoded value as a half garbled input and insert the document
-    std::array<CipherText<GCK>, GCN/2> Xa = encode(v, rootE, rootR);
+    std::array<CipherText<GCK>, GCN/2> Xa = encode(v, rootE[0], rootR[0]);
 
     // Insert the document into the index
     // Note that in the example, there is only one tree so the root is always 0
@@ -129,8 +131,10 @@ ArxRange buildRangeIndex() {
     // Update the root garbled circuit information on the client side
     if (!hasRoot) {
       hasRoot = true;
-      rootE >>= gC1.e;
-      rootR = gC1.R;
+      rootE[0] >>= gC1.e;
+      rootR[0] = gC1.R;
+      rootE[1] >>= gC2.e;
+      rootR[1] = gC2.R;
     }
   }
 
@@ -149,10 +153,10 @@ ArxRange buildRangeIndex() {
  * @param[in] high The higher bound
  * @return The list of primary keys of documents in the given range
  */
-std::vector<size_t> select(ArxRange& index, size_t low, size_t high) {
+std::vector<size_t> select(ArxRange& index, unsigned low, unsigned high) {
   // Encode the query
-  std::array<CipherText<GCK>, GCN/2> Xl = encode(low, rootE, rootR);
-  std::array<CipherText<GCK>, GCN/2> Xh = encode(high, rootE, rootR);
+  std::array<CipherText<GCK>, GCN/2> Xl = encode(low, rootE[0], rootR[0]);
+  std::array<CipherText<GCK>, GCN/2> Xh = encode(high, rootE[1], rootR[1]);
 
   // Search for documents between the lower and higher bounds
   std::vector<ArxRange::Node*> out;
