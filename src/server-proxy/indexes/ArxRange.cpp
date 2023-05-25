@@ -159,6 +159,7 @@ void ArxRange::searchDoc(std::vector<Node*>& out, size_t treeL, size_t treeH, co
 
   this->traverse(nodeL, Xl, 0, N);
   this->traverse(nodeH, Xh, 1, N);
+  nodeH = this->next(nodeH);
 
   // Get the nodes in (nodeL, nodeH]
   while (nodeL && nodeL != nodeH) {
@@ -210,6 +211,7 @@ void ArxRange::deleteDoc(std::set<Cipher<32>>& out, size_t treeL, size_t treeH, 
 
   this->traverse(nodeL, Xl, 0, N);
   this->traverse(nodeH, Xh, 1, N);
+  nodeH = this->next(nodeH);
 
   // Get the nodes in (nodeL, nodeH]
   std::vector<Node*> S;
