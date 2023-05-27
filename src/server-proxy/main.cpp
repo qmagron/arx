@@ -342,7 +342,7 @@ void printPreamble() {
   std::cout << std::endl;
   for (size_t i = 0; i < databaseEq.size() / 2; ++i) {
     std::cout << "ArxEq[" << i << "] = " << (unsigned)databaseEq[i];
-    std::cout << "  \t\t";
+    std::cout << " \t\t";
     std::cout << "ArxEq[" << databaseEq.size() / 2 + i << "] = " << (unsigned)databaseEq[databaseEq.size() / 2 + i];
     std::cout << std::endl;
   }
@@ -353,6 +353,7 @@ void printPreamble() {
 int main() {
   printPreamble();
   testArxRanges();
+  std::cout << std::endl;
   testArxEq();
 
 
