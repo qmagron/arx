@@ -5,18 +5,17 @@
 #include <vector>
 #include "Base.hpp"
 
-class SearchToken
-{
+class SearchToken {
 private:
   std::vector<Cipher<32>> possibleCiphers;
   bool empty;
-  
+
 public:
-  SearchToken(int value,size_t counter,byte[16]);
+  SearchToken(unsigned value, unsigned counter, byte[16]);
   std::vector<Cipher<32>> ApplyToken(std::vector<Cipher<32>> database);
 };
 
-std::vector<int> searchArxEq(int value,size_t counter,std::vector<Cipher<32>> database,byte key[16]);
+std::vector<unsigned> searchArxEq(unsigned value, unsigned counter, std::vector<Cipher<32>> database, byte key[16]);
 
 
 #endif

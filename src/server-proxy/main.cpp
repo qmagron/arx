@@ -4,15 +4,39 @@
 #include <vector>
 
 #include "server-proxy/indexes/ArxRange.hpp"
+#include "server-proxy/indexes/ArxEq.hpp"
 #include "Base.hpp"
 #include "crypto/circuits.hpp"
 #include "crypto/utils.hpp"
 
 
 constexpr size_t N_DOCS = 100;
+constexpr size_t N_DIFF = 5;    // Number of different plaintexts in ArxEq
 
 
-const auto C = COMP<GCN/2>();
+template<size_t N_DIFF, size_t N_DOCS>
+constexpr std::array<unsigned, N_DOCS> randomEqIndex() {
+  std::array<unsigned, N_DOCS> database;
+
+  // 1. Generate nDiff different plaintext values
+  std::array<unsigned, N_DIFF> plaintexts = random_array<unsigned, N_DIFF>();
+
+  // 2. Randomly map nDiff values with documents
+  std::array<size_t, N_DOCS> dbMap = random_array<size_t, N_DOCS>();
+  for (size_t d = 0; d < N_DOCS; ++d) {
+    dbMap[d] = dbMap[d] % N_DIFF;
+  }
+
+  // 3. Place the mapped plaintexts in the database
+  for (size_t d = 0; d < N_DOCS; ++d) {
+    database[d] = dbMap[d];
+  }
+
+  return database;
+}
+
+
+const auto C = COMP<GCN / 2>();
 
 /* 128 bit array key of 59E22E9D3351B9B46627F49DA8BF56D4 */
 inline byte rangeKey[AES::DEFAULT_KEYLENGTH] = {
@@ -20,14 +44,20 @@ inline byte rangeKey[AES::DEFAULT_KEYLENGTH] = {
   0x66, 0x27, 0xF4, 0x9D, 0xA8, 0xBF, 0x56, 0xD4
 };
 
+inline byte eqKey[AES::DEFAULT_KEYLENGTH] = {
+  0x59, 0xE2, 0x2E, 0x9D, 0x33, 0x51, 0xB9, 0xB4,
+  0x66, 0x27, 0xF4, 0x9D, 0xA8, 0xBF, 0x56, 0xD5
+};
 
-/* The database contains documents with random values v that will be indexed. */
-std::array<unsigned, N_DOCS> database = random_array<unsigned, N_DOCS>();
+
+/* The range database contains documents with random values v that will be indexed. */
+std::array<unsigned, N_DOCS> databaseRange = random_array<unsigned, N_DOCS>();
+std::array<unsigned, N_DOCS> databaseEq = randomEqIndex<N_DIFF, N_DOCS>();
 
 
 /* The root node is stored on the client side to encode the query */
 bool hasRoot = false;
-std::array<CipherText<GCK>, GCN/2> rootE[2];
+std::array<CipherText<GCK>, GCN / 2> rootE[2];
 CipherText<GCK> rootR[2];
 
 
@@ -47,9 +77,9 @@ void repairNodes(ArxRange& index, std::set<ArxRange::Node*>& nodes) {
   // Sort nodes by increasing height
   std::sort(vNodes.begin(), vNodes.end(), [](ArxRange::Node* a, ArxRange::Node* b) {
     return a->height < b->height;
-  });
+    });
 
-  for (ArxRange::Node* node: vNodes) {
+  for (ArxRange::Node* node : vNodes) {
     // Skip leaf nodes
     if (node->height == 1) {
       continue;
@@ -63,17 +93,17 @@ void repairNodes(ArxRange& index, std::set<ArxRange::Node*>& nodes) {
     // Compute nid and nonce for children
     size_t nidL = node->children[0] ? node->children[0]->nid : 0;
     size_t nidR = node->children[1] ? node->children[1]->nid : 0;
-    size_t nonceL1 = nidL ? garbledCounter[nidL]-2 : 0;
-    size_t nonceR1 = nidR ? garbledCounter[nidR]-2 : 0;
-    size_t nonceL2 = nidL ? garbledCounter[nidL]-1 : 0;
-    size_t nonceR2 = nidR ? garbledCounter[nidR]-1 : 0;
+    size_t nonceL1 = nidL ? garbledCounter[nidL] - 2 : 0;
+    size_t nonceR1 = nidR ? garbledCounter[nidR] - 2 : 0;
+    size_t nonceL2 = nidL ? garbledCounter[nidL] - 1 : 0;
+    size_t nonceR2 = nidR ? garbledCounter[nidR] - 1 : 0;
 
     // Build new garbled circuits
-    BGCC<GCN,GCK> gC1 = generateBGCC<GCN,GCK>(C, nid, garbledCounter[nid]++, nidL, nonceL1, nidR, nonceR1);
-    BGCC<GCN,GCK> gC2 = generateBGCC<GCN,GCK>(C, nid, garbledCounter[nid]++, nidL, nonceL2, nidR, nonceR2);
+    BGCC<GCN, GCK> gC1 = generateBGCC<GCN, GCK>(C, nid, garbledCounter[nid]++, nidL, nonceL1, nidR, nonceR1);
+    BGCC<GCN, GCK> gC2 = generateBGCC<GCN, GCK>(C, nid, garbledCounter[nid]++, nidL, nonceL2, nidR, nonceR2);
 
     // Finally repair nodes
-    const LightBGCC<GCN,GCK>* lgC[2] = { lightenBGCC(gC1,v), lightenBGCC(gC2,v) };
+    const LightBGCC<GCN, GCK>* lgC[2] = { lightenBGCC(gC1,v), lightenBGCC(gC2,v) };
     index.repairNode(nid, lgC);
 
     // Update the root garbled circuit information if necessary
@@ -94,22 +124,22 @@ ArxRange buildRangeIndex() {
   ArxRange index;
 
   // Index documents on the field v
-  for (size_t pk = 0; pk != database.size(); ++pk) {
-    size_t nid = random_array<size_t,1>()[0];
-    size_t v = database[pk];
+  for (size_t pk = 0; pk != databaseRange.size(); ++pk) {
+    size_t nid = random_array<size_t, 1>()[0];
+    size_t v = databaseRange[pk];
 
 #if DEBUG >=2
     std::cout << nid << "\t->\t" << v << std::endl;
 #endif
 
     // Build initial garbled circuits
-    BGCC<GCN,GCK> gC1 = generateBGCC<GCN,GCK>(C, nid, garbledCounter[nid]++);
-    BGCC<GCN,GCK> gC2 = generateBGCC<GCN,GCK>(C, nid, garbledCounter[nid]++);
+    BGCC<GCN, GCK> gC1 = generateBGCC<GCN, GCK>(C, nid, garbledCounter[nid]++);
+    BGCC<GCN, GCK> gC2 = generateBGCC<GCN, GCK>(C, nid, garbledCounter[nid]++);
 
     // Note that counters must be different for each index and each node.
     // Since there is only one range index, counters are only different for each node.
     // Moreover, since there is only one node per pk, counters are only different for each pk.
-    ArxRange::Node* node = new ArxRange::Node {
+    ArxRange::Node* node = new ArxRange::Node{
       .nid = nid,
       .gC = { lightenBGCC(gC1,v), lightenBGCC(gC2,v) },
       .pk = Base::encryptInt(pk, 0, rangeKey),
@@ -122,7 +152,7 @@ ArxRange buildRangeIndex() {
     std::set<ArxRange::Node*> consumedNodes;
 
     // Encore the hardcoded value as a half garbled input and insert the document
-    std::array<CipherText<GCK>, GCN/2> Xa = encode(v, rootE[0], rootR[0]);
+    std::array<CipherText<GCK>, GCN / 2> Xa = encode(v, rootE[0], rootR[0]);
 
     // Insert the document into the index
     // Note that in the example, there is only one tree so the root is always 0
@@ -158,8 +188,8 @@ ArxRange buildRangeIndex() {
  */
 std::vector<size_t> select(ArxRange& index, unsigned low, unsigned high) {
   // Encode the query
-  std::array<CipherText<GCK>, GCN/2> Xl = encode(low, rootE[0], rootR[0]);
-  std::array<CipherText<GCK>, GCN/2> Xh = encode(high, rootE[1], rootR[1]);
+  std::array<CipherText<GCK>, GCN / 2> Xl = encode(low, rootE[0], rootR[0]);
+  std::array<CipherText<GCK>, GCN / 2> Xh = encode(high, rootE[1], rootR[1]);
 
   // Search for documents between the lower and higher bounds
   std::vector<ArxRange::Node*> out;
@@ -168,7 +198,7 @@ std::vector<size_t> select(ArxRange& index, unsigned low, unsigned high) {
 
   // Decrypt the primary keys
   std::vector<size_t> docs;
-  for (auto& node: out) {
+  for (auto& node : out) {
     size_t pk = Base::decryptInt(node->pk, 0, rangeKey);
     docs.push_back(pk);
   }
@@ -181,16 +211,16 @@ std::vector<size_t> select(ArxRange& index, unsigned low, unsigned high) {
 
 
 bool testArxRange(ArxRange& rangeIndex, unsigned low, unsigned high) {
-  std::cout << "--------------------[ SELECT between " << low <<  " and " << high << " ]--------------------" << std::endl;
+  std::cout << "--------------------[ SELECT between " << low << " and " << high << " ]--------------------" << std::endl;
 
   // Fill expected
   std::vector<size_t> expected;
-  for (size_t pk = 0; pk < database.size(); ++pk) {
-    if (database[pk] >= low && database[pk] <= high) {
+  for (size_t pk = 0; pk < databaseRange.size(); ++pk) {
+    if (databaseRange[pk] >= low && databaseRange[pk] <= high) {
       expected.push_back(pk);
     }
   }
-  std::sort(expected.begin(), expected.end(), [&](size_t pk1, size_t pk2) { return database[pk1] < database[pk2]; });
+  std::sort(expected.begin(), expected.end(), [&](size_t pk1, size_t pk2) { return databaseRange[pk1] < databaseRange[pk2]; });
 
   // Fetch the index
   std::vector<size_t> received = select(rangeIndex, low, high);
@@ -198,11 +228,12 @@ bool testArxRange(ArxRange& rangeIndex, unsigned low, unsigned high) {
   // 1. Check the size
   if (received.size() == expected.size()) {
     std::cout << "Size: OK" << std::endl;
-  } else {
+  }
+  else {
     std::cerr << "Size: FAIL" << std::endl;
     std::cerr << "  Expected: " << expected.size() << std::endl;
     std::cerr << "  Got: " << received.size() << std::endl;
-    std::cerr << "  Got: "; for (auto& doc: received) std::cerr << doc << " "; std::cerr << std::endl;
+    std::cerr << "  Got: "; for (auto& doc : received) std::cerr << doc << " "; std::cerr << std::endl;
     return false;
   }
 
@@ -213,7 +244,7 @@ bool testArxRange(ArxRange& rangeIndex, unsigned low, unsigned high) {
       std::cerr << "Content: FAIL" << std::endl;
       std::cerr << "  Expected: " << expected[d] << std::endl;
       std::cerr << "  Got: " << received[d] << std::endl;
-      std::cerr << "  Got: "; for (auto& doc: received) std::cerr << doc << " "; std::cerr << std::endl;
+      std::cerr << "  Got: "; for (auto& doc : received) std::cerr << doc << " "; std::cerr << std::endl;
       ok = false;
       break;
     }
@@ -233,18 +264,18 @@ void testArxRanges() {
   ArxRange rangeIndex = buildRangeIndex();
 
 #if DEBUG >= 1
-    rangeIndex.print();
-    std::cout << std::endl;
+  rangeIndex.print();
+  std::cout << std::endl;
 #endif
 
   unsigned ranges[][2] = {
     { 0               , (unsigned)-1 },
-    { 0               , ((unsigned)-1)/2 },
-    { ((unsigned)-1)/2, (unsigned)-1 },
+    { 0               , ((unsigned)-1) / 2 },
+    { ((unsigned)-1) / 2, (unsigned)-1 },
   };
 
   // Predefined ranges
-  for (auto& range: ranges) {
+  for (auto& range : ranges) {
     testArxRange(rangeIndex, range[0], range[1]);
   }
 
@@ -256,12 +287,64 @@ void testArxRanges() {
 }
 
 
+std::vector<Cipher<32>> buildArxEq(std::map<unsigned, unsigned>& counters) {
+  std::vector<Cipher<32>> index;
+
+  for (size_t d = 0; d < databaseEq.size(); ++d) {
+    index.push_back(Base::encryptInt(databaseEq[d], counters[d]++, eqKey));
+  }
+
+  return index;
+}
+
+
+bool testArxEq() {
+  std::cout << "====================[ ArxEq ]====================" << std::endl;
+
+  std::map<unsigned, unsigned> counters;
+  auto index = buildArxEq(counters);
+
+  for (auto& [v, counter]: counters) {
+    std::cout << "--------------------[ SELECT " << v << " ]--------------------" << std::endl;
+    auto received = searchArxEq(v, counter, index, eqKey);
+
+    // Fill expected
+    size_t expectedSize;
+    for (size_t pk = 0; pk < databaseEq.size(); ++pk) {
+      if (databaseEq[pk] == v) {
+        ++expectedSize;
+      }
+    }
+
+    if (received.size() == expectedSize) {
+      std::cout << "Size: OK" << std::endl;
+    }
+    else {
+      std::cerr << "Size: FAIL" << std::endl;
+      std::cerr << "  Expected: " << expectedSize << std::endl;
+      std::cerr << "  Got: " << received.size() << std::endl;
+      std::cerr << "  Got: "; for (auto& doc : received) std::cerr << doc << " "; std::cerr << std::endl;
+      return false;
+    }
+  }
+
+  return true;
+}
+
+
 void printPreamble() {
-  std::cout << "====================[ Database ]====================" << std::endl;
-  for (size_t i = 0; i < database.size() / 2; ++i) {
-    std::cout << "database[" << i << "] = " << (size_t) database[i];
+  std::cout << "====================[ Databases ]====================" << std::endl;
+  for (size_t i = 0; i < databaseRange.size() / 2; ++i) {
+    std::cout << "ArxRange[" << i << "] = " << (unsigned)databaseRange[i];
     std::cout << "  \t\t";
-    std::cout << "database[" << database.size()/2 + i << "] = " << (size_t) database[database.size()/2 + i];
+    std::cout << "ArxRange[" << databaseRange.size() / 2 + i << "] = " << (unsigned)databaseRange[databaseRange.size() / 2 + i];
+    std::cout << std::endl;
+  }
+  std::cout << std::endl;
+  for (size_t i = 0; i < databaseEq.size() / 2; ++i) {
+    std::cout << "ArxEq[" << i << "] = " << (unsigned)databaseEq[i];
+    std::cout << "  \t\t";
+    std::cout << "ArxEq[" << databaseEq.size() / 2 + i << "] = " << (unsigned)databaseEq[databaseEq.size() / 2 + i];
     std::cout << std::endl;
   }
   std::cout << std::endl;
@@ -271,6 +354,7 @@ void printPreamble() {
 int main() {
   printPreamble();
   testArxRanges();
+  testArxEq();
 
 
 
