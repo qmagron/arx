@@ -29,7 +29,7 @@ constexpr std::array<unsigned, N_DOCS> randomEqIndex() {
 
   // 3. Place the mapped plaintexts in the database
   for (size_t d = 0; d < N_DOCS; ++d) {
-    database[d] = dbMap[d];
+    database[d] = plaintexts[dbMap[d]];
   }
 
   return database;
@@ -291,7 +291,7 @@ std::vector<Cipher<32>> buildArxEq(std::map<unsigned, unsigned>& counters) {
   std::vector<Cipher<32>> index;
 
   for (size_t d = 0; d < databaseEq.size(); ++d) {
-    index.push_back(Base::encryptInt(databaseEq[d], counters[d]++, eqKey));
+    index.push_back(Base::encryptInt(databaseEq[d], counters[databaseEq[d]]++, eqKey));
   }
 
   return index;
@@ -309,7 +309,7 @@ bool testArxEq() {
     auto received = searchArxEq(v, counter, index, eqKey);
 
     // Fill expected
-    size_t expectedSize;
+    size_t expectedSize = 0;
     for (size_t pk = 0; pk < databaseEq.size(); ++pk) {
       if (databaseEq[pk] == v) {
         ++expectedSize;
@@ -323,7 +323,6 @@ bool testArxEq() {
       std::cerr << "Size: FAIL" << std::endl;
       std::cerr << "  Expected: " << expectedSize << std::endl;
       std::cerr << "  Got: " << received.size() << std::endl;
-      std::cerr << "  Got: "; for (auto& doc : received) std::cerr << doc << " "; std::cerr << std::endl;
       return false;
     }
   }
